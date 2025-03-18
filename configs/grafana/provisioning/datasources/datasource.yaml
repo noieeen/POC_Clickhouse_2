@@ -1,0 +1,31 @@
+# config file version
+apiVersion: 1
+
+# list of datasources to insert/update
+datasources:
+  # Prometheus datasource
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+
+  # Jaeger datasource
+  - name: Jaeger
+    type: jaeger
+    access: proxy
+    url: http://jaeger:16686
+    editable: true
+
+  # ClickHouse datasource
+  - name: ClickHouse
+    type: grafana-clickhouse-datasource
+    access: proxy
+    url: http://clickhouse:8123
+    jsonData:
+      defaultDatabase: logs
+      username: default
+    secureJsonData:
+      password: ""  # No password by default, configure as needed
+    editable: true
