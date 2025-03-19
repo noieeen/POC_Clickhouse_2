@@ -29,7 +29,7 @@ otel.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddSqlClientInstrumentation()
-        .AddOtlpExporter(options => options.Endpoint = new Uri("http://localhost:4317"));
+        .AddOtlpExporter(options => options.Endpoint = new Uri("http://otel-collector:4317"));
 });
 
 // Add OpenTelemetry metrics
@@ -44,7 +44,7 @@ otel.Services.AddOpenTelemetry().WithMetrics(meterProviderBuilder =>
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddRuntimeInstrumentation()
-        .AddOtlpExporter(options => options.Endpoint = new Uri("http://localhost:4317"));
+        .AddOtlpExporter(options => options.Endpoint = new Uri("http://otel-collector:4317"));
 });
 
 builder.Logging.ClearProviders();
@@ -52,11 +52,11 @@ builder.Logging.ClearProviders();
 // Configure logging
 builder.Logging.AddOpenTelemetry(options =>
 {
-    options.AddConsoleExporter(); // Log on console
+    options.AddConsoleExporter(); // Export logs to the console
     options.SetResourceBuilder(resourceBuilder);
     options.AddOtlpExporter(x =>
     {
-        x.Endpoint = new Uri("http://localhost:4317");
+        x.Endpoint = new Uri("http://otel-collector:4317");
         x.Protocol = OtlpExportProtocol.Grpc;
         // options.Headers = "";
     });

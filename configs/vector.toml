@@ -25,13 +25,29 @@ address = "0.0.0.0:4317"
 address = "0.0.0.0:4318"
 headers = []
 
-# Add a transform to process logs
+## Add a transform to process logs
+#[transforms.otel_logs]
+#type = "remap"
+#inputs = ["otel.logs"]
+#source = '''
+## Extract relevant fields
+#. = parse_json!(string!(.message))
+#'''
+
+# Optional: Transformation to add labels or filter logs
 [transforms.otel_logs]
 type = "remap"
-inputs = ["otel.logs"]
+inputs = ["otel_logs"]
 source = '''
-# Extract relevant fields
-. = parse_json!(string!(.message))
+  # Remap attributes to structured labels
+  . = merge(., {
+    "trace_id": .TraceId,
+    "span_id": .SpanId,
+    "severity": .SeverityText,
+    "message": .Body,
+    "service_name": .service.name,
+    "service_version": .service.version
+  })
 '''
 
 [sinks.console]
