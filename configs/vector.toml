@@ -18,33 +18,61 @@ address = "0.0.0.0:9598"
 type = "opentelemetry"
 
 [sources.otel.grpc]
-# For version 0.45.0, we need to use the proper structure
 address = "0.0.0.0:4317"
 
 # OpenTelemetry HTTP source
 [sources.otel.http]
-# For version 0.45.0, we need to use the proper structure
 address = "0.0.0.0:4318"
 headers = []
 
-# Transformations
-[transforms.parse_logs]
+# Add a transform to process logs
+[transforms.otel_logs]
 type = "remap"
-inputs = ["otel_grpc"]
+inputs = ["otel.logs"]
 source = '''
 # Extract relevant fields
 . = parse_json!(string!(.message))
 '''
+#source = '''
+#.otel_service_name = .attributes["service.name"] ?? "unknown"
+#.otel_trace_id = .trace_id ?? "no-trace"
+#.otel_span_id = .span_id ?? "no-span"
+#'''
 
-## Data sinks
-#[sinks.clickhouse_logs]
-#type = "clickhouse"
-#inputs = ["parse_logs"]
-#database = "logs"
-#endpoint = "http://clickhouse:8123"
-#table = "logs"
-#skip_unknown_fields = true
-#compression = "gzip"
+## Transformations
+#[transforms.otel_grpc_logs]
+#type   = "remap"
+#inputs = ["otel"]
+#source = '''
+## Extract relevant fields
+#. = parse_json!(string!(.message))
+#'''
+
+## Transformations
+#[transforms.otel.gprc]
+##inputs = ["opentelemetry.logs"]
+#type   = "remap"
+#source = '''
+## Extract relevant fields
+#. = parse_json!(string!(.message))
+#'''
+
+[sinks.console]
+type = "console"
+inputs = ["otel_logs"]
+encoding.codec = "json"
+
+
+
+# Data sinks
+[sinks.clickhouse_logs]
+type = "clickhouse"
+inputs = ["otel_logs"]
+database = "logs"
+endpoint = "http://clickhouse:8123"
+table = "logs"
+skip_unknown_fields = true
+compression = "gzip"
 
 ## Health checks
 #[sinks.clickhouse_logs.healthcheck]
