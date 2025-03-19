@@ -30,3 +30,10 @@ scrape_configs:
       - targets: [ 'clickhouse:9363' ]
         labels:
           group: 'processor'
+
+  - job_name: 'vector'
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ 'vector:9598' ]
+        labels:
+          group: 'processor'

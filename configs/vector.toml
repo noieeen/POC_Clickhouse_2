@@ -1,17 +1,31 @@
+# Data sources
+[sources.internal_metrics]
+type = "internal_metrics"
+
 # Vector's API server
 [api]
 enabled = true
 address = "0.0.0.0:8383"
 
-# Data sources
-[sources.otel_grpc]
+# Prometheus metrics exporter
+[sinks.prometheus]
+type = "prometheus_exporter"
+inputs = ["internal_metrics"]
+address = "0.0.0.0:9598"
+
+# OpenTelemetry source
+[sources.otel]
 type = "opentelemetry"
+
+[sources.otel.grpc]
+# For version 0.45.0, we need to use the proper structure
 address = "0.0.0.0:4317"
 
-# Data sources
-[sources.otel_http]
-type = "opentelemetry"
+# OpenTelemetry HTTP source
+[sources.otel.http]
+# For version 0.45.0, we need to use the proper structure
 address = "0.0.0.0:4318"
+headers = []
 
 # Transformations
 [transforms.parse_logs]
@@ -22,16 +36,16 @@ source = '''
 . = parse_json!(string!(.message))
 '''
 
-# Data sinks
-[sinks.clickhouse_logs]
-type = "clickhouse"
-inputs = ["parse_logs"]
-database = "logs"
-endpoint = "http://clickhouse:8123"
-table = "logs"
-skip_unknown_fields = true
-compression = "gzip"
+## Data sinks
+#[sinks.clickhouse_logs]
+#type = "clickhouse"
+#inputs = ["parse_logs"]
+#database = "logs"
+#endpoint = "http://clickhouse:8123"
+#table = "logs"
+#skip_unknown_fields = true
+#compression = "gzip"
 
-# Health checks
-[sinks.clickhouse_logs.healthcheck]
-enabled = true
+## Health checks
+#[sinks.clickhouse_logs.healthcheck]
+#enabled = true
