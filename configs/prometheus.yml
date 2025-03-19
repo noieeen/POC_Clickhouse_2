@@ -16,3 +16,17 @@ scrape_configs:
       - targets: ['localhost:9090']
         labels:
           group: 'prometheus'
+          
+  - job_name: 'services'
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ 'service_a:8080' ]
+        labels:
+          group: 'service'
+          
+  - job_name: 'clickhouse'
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ 'clickhouse:9363' ]
+        labels:
+          group: 'processor'

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -28,7 +29,7 @@ otel.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddSqlClientInstrumentation()
-        .AddOtlpExporter(options => options.Endpoint = new Uri("http://otel-collector:4317"));
+        .AddOtlpExporter(options => options.Endpoint = new Uri("http://localhost:4317"));
 });
 
 // Add OpenTelemetry metrics
@@ -36,23 +37,38 @@ otel.Services.AddOpenTelemetry().WithMetrics(meterProviderBuilder =>
 {
     meterProviderBuilder
         .SetResourceBuilder(resourceBuilder)
+        .AddPrometheusExporter()
+        // Metrics provides by ASP.NET Core in .NET 8
+        .AddMeter("Microsoft.AspNetCore.Hosting")
+        .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddRuntimeInstrumentation()
-        .AddOtlpExporter(options => options.Endpoint = new Uri("http://otel-collector:4317"));
+        .AddOtlpExporter(options => options.Endpoint = new Uri("http://localhost:4317"));
 });
+
+builder.Logging.ClearProviders();
 
 // Configure logging
 builder.Logging.AddOpenTelemetry(options =>
 {
+    options.AddConsoleExporter(); // Log on console
     options.SetResourceBuilder(resourceBuilder);
-    options.AddOtlpExporter(options => options.Endpoint = new Uri("http://otel-collector:4317"));
+    options.AddOtlpExporter(x =>
+    {
+        x.Endpoint = new Uri("http://localhost:4317");
+        x.Protocol = OtlpExportProtocol.Grpc;
+        // options.Headers = "";
+    });
 });
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

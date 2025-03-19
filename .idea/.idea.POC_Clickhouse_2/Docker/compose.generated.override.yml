@@ -1,6 +1,6 @@
 # This is a generated file. Not intended for manual editing.
 services:
-  servicea:
+  service_a:
     build:
       context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2"
       dockerfile: "ServiceA/Dockerfile"
@@ -12,7 +12,7 @@ services:
     environment:
       ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net8.0/ServiceA.staticwebassets.runtime.CT.json"
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "servicea:dev"
+    image: "noieeen/servicea:dev"
     ports: []
     volumes:
     - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/ServiceA:/app:rw"

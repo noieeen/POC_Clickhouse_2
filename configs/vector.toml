@@ -8,6 +8,11 @@ address = "0.0.0.0:8383"
 type = "opentelemetry"
 address = "0.0.0.0:4317"
 
+# Data sources
+[sources.otel_http]
+type = "opentelemetry"
+address = "0.0.0.0:4318"
+
 # Transformations
 [transforms.parse_logs]
 type = "remap"

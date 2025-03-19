@@ -1,6 +1,6 @@
 ﻿services:
-  servicea:
-    image: servicea
+  service_a:
+    image: noieeen/servicea
     build:
       context: .
       dockerfile: ServiceA/Dockerfile
@@ -17,6 +17,7 @@
   # OpenTelemetry Collector
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
     volumes:
       - ./configs/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
     ports:
@@ -32,7 +33,7 @@
     image: prom/prometheus:latest
     volumes:
       - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
+      - ./data/prometheus-data:/prometheus
     ports:
       - "9090:9090"
     networks:
@@ -64,7 +65,7 @@
   clickhouse:
     image: clickhouse/clickhouse-server:latest
     volumes:
-      - clickhouse-data:/var/lib/clickhouse
+      - ./data/clickhouse-data:/var/lib/clickhouse
       - ./configs/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./configs/clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml
       - ./configs/clickhouse-users.xml:/etc/clickhouse-server/users.d/logging.xml
@@ -73,18 +74,31 @@
       - "9000:9000"  # Native interface
     networks:
       - monitoring-network
+  
+#  # Exports Traces to Tempo
+#  tempo:
+#    image: grafana/tempo:latest
+#    command: [ "-config.file=/etc/tempo.yaml" ]
+#    volumes:
+#      - ./configs/tempo.yaml:/etc/tempo.yaml
+#      - ./data/tempo-data:/tmp/tempo
+#    ports:
+#      - "3200"  # tempo
+#      - "4317"  # otlp grpc
+#      - "4318"  # otlp http
 
   # Grafana for visualization
   grafana:
     image: grafana/grafana:latest
     volumes:
-      - grafana-data:/var/lib/grafana
+      - ./data/grafana-data:/var/lib/grafana
       - ./configs/grafana/provisioning:/etc/grafana/provisioning
       - ./configs/grafana/dashboards:/var/lib/grafana/dashboards
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_SECURITY_ADMIN_USER=admin
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clickhouse-datasource
     ports:
       - "3000:3000"
     depends_on:
