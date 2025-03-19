@@ -33,11 +33,36 @@ source = '''
 # Extract relevant fields
 . = parse_json!(string!(.message))
 '''
+#source = '''
+#.otel_service_name = .attributes["service.name"] ?? "unknown"
+#.otel_trace_id = .trace_id ?? "no-trace"
+#.otel_span_id = .span_id ?? "no-span"
+#'''
+
+## Transformations
+#[transforms.otel_grpc_logs]
+#type   = "remap"
+#inputs = ["otel"]
+#source = '''
+## Extract relevant fields
+#. = parse_json!(string!(.message))
+#'''
+
+## Transformations
+#[transforms.otel.gprc]
+##inputs = ["opentelemetry.logs"]
+#type   = "remap"
+#source = '''
+## Extract relevant fields
+#. = parse_json!(string!(.message))
+#'''
 
 [sinks.console]
 type = "console"
 inputs = ["otel_logs"]
 encoding.codec = "json"
+
+
 
 # Data sinks
 [sinks.clickhouse_logs]
@@ -49,6 +74,6 @@ table = "logs"
 skip_unknown_fields = true
 compression = "gzip"
 
-# Health checks
-[sinks.clickhouse_logs.healthcheck]
-enabled = true
+## Health checks
+#[sinks.clickhouse_logs.healthcheck]
+#enabled = true

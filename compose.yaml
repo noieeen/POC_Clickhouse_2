@@ -74,6 +74,11 @@
     ports:
       - "8123:8123"  # HTTP interface
       - "9000:9000"  # Native interface
+    environment:
+      - CLICKHOUSE_DB=logs
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=
+      - CLICKHOUSE_ALWAYS_RUN_INITDB_SCRIPTS=1
     networks:
       - monitoring-network
   
