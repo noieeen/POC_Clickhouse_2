@@ -40,6 +40,8 @@
             <profile>default</profile>
             <quota>default</quota>
             <access_management>1</access_management>
+<!--            If you need native JSON queries in ClickHouse.-->
+<!--            <enable_json_type>1</enable_json_type> -->
         </default>
 
         <!-- Read-only user for metrics and monitoring -->

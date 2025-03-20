@@ -44,59 +44,8 @@ max_connection_age_secs = 300
 type = "remap"
 inputs = ["otel.logs"]
 source = """
-# Parse the JSON message
-event = .
-
-# Map nested 'attributes' fields
-attributes = []
-for_each(object!(event.attributes)) ->  |key, value| {
-attributes = push(attributes, {"key" : key, "value" : value})
-}
-#for_each(array!(.attributes)) -> |_index, value| {
-
-#}
-#for_each(key, value in .attributes) {
-#  .attributes = .attributes + {"key": key, "value": value}
-#}
-
-# Map nested 'resources' fields
-resources = []
-for_each(object!(event.resources)) ->  |key, value| {
-resources = push(resources, {"key" : key, "value" : value})
-}
-
-# Map top-level fields
-#.timestamp = parse_timestamp!(.timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
-#.observed_timestamp = parse_timestamp!(.observed_timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
-.severity_number = to_int!(.severity_number)
-.severity_text = .severity_text
-.message = .message
-.dropped_attributes_count = to_int!(.dropped_attributes_count)
-.flags = to_int!(.flags)
-.scope_name = .scope.name
-.span_id = .span_id
-.trace_id = .trace_id
-.source_type = .source_type
-#.resources = resources
-#.attributes = attributes
+    . = parse_json!(.message)
 """
-
-#source = """
-#    . = {
-#      "dropped_attributes_count": .dropped_attributes_count,
-#      "flags": .flags,
-#      "message": encode_json(.message),
-##      "observed_timestamp": .observed_timestamp,
-#      "severity_number": .severity_number,
-#      "severity_text": .severity_text,
-#      "source_type": .source_type,
-#      "span_id": .span_id,
-#      "timestamp": to_datetime(.timestamp),
-#      "trace_id": .trace_id
-#    }
-#"""
-
-
 
 ## Work
 #source = """
@@ -146,17 +95,20 @@ encoding.codec = "json"
 target = "stdout" #[stderr, stdout]
 
 
-## Data sinks
-#[sinks.clickhouse_logs]
-#type = "clickhouse"
-#inputs = ["otel_logs"]
-#database = "logs"
-#table = "logs"
-#endpoint = "http://clickhouse:8123"
-#compression = "gzip"
-##encoding.codec = "json"  # Use JSON format for structured logs
-#skip_unknown_fields = true
-#
-## Health checks
-#[sinks.clickhouse_logs.healthcheck]
-#enabled = true
+# Data sinks
+[sinks.clickhouse_logs]
+type = "clickhouse"
+inputs = ["otel_logs"]
+database = "logs"
+table = "logs"
+endpoint = "http://clickhouse:8123"
+compression = "gzip"
+#encoding.codec = "json"  # Use JSON format for structured logs
+skip_unknown_fields = true
+
+[sinks.clickhouse.encoding]
+codec = "json"
+
+# Health checks
+[sinks.clickhouse_logs.healthcheck]
+enabled = true

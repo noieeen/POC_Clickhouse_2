@@ -21,11 +21,53 @@ datasources:
   # ClickHouse datasource
   - name: ClickHouse
     type: grafana-clickhouse-datasource
-    access: proxy
-    url: http://clickhouse:8123
     jsonData:
-      defaultDatabase: logs
+      host: clickhouse
+      port: 9000
+      protocol: native
+      secure: false
       username: default
-    secureJsonData:
-      password: ""  # No password by default, configure as needed
+#      tlsSkipVerify: <boolean>
+#      tlsAuth: <boolean>
+#      tlsAuthWithCACert: <boolean>
+      defaultDatabase: logs
+      defaultTable: logs
+#      dialTimeout: 10
+#      queryTimeout: 60
+#      validateSql: false
+#      httpHeaders:
+#        - name: X-Example-Plain-Header
+#          value: plain text value
+#          secure: false
+#        - name: X-Example-Secure-Header
+#          secure: true
+      logs:
+        defaultDatabase: default
+        defaultTable: otel_logs
+#        otelEnabled: false
+#        otelVersion: latest
+#        timeColumn: <string>
+#        levelColumn: <string>
+#        messageColumn: <string>
+      traces:
+        defaultDatabase: default
+#        defaultTable: otel_traces
+#        otelEnabled: false
+#        otelVersion: latest
+#        traceIdColumn: <string>
+#        spanIdColumn: <string>
+#        operationNameColumn: <string>
+#        parentSpanIdColumn: <string>
+#        serviceNameColumn: <string>
+#        durationTimeColumn: <string>
+#        durationUnitColumn: <time unit>
+#        startTimeColumn: <string>
+#        tagsColumn: <string>
+#        serviceTagsColumn: <string>
+#    secureJsonData:
+#      tlsCACert: <string>
+#      tlsClientCert: <string>
+#      tlsClientKey: <string>
+#      secureHttpHeaders.X-Example-Secure-Header: secure header value
     editable: true
+    

@@ -1,0 +1,26 @@
+{
+  "attributes": {
+    "Time": "03/20/2025 09:28:55"
+  },
+  "dropped_attributes_count": 0,
+  "flags": 1,
+  "message": "Sample endpoint called at {Time}",
+  "observed_timestamp": "2025-03-20T09:28:55.898969800Z",
+  "resources": {
+    "service.instance.id": "93f4c3bf-f14d-4152-9061-91bf9d1b8ee7",
+    "service.name": "ServiceA",
+    "service.version": "1.0.0",
+    "telemetry.sdk.language": "dotnet",
+    "telemetry.sdk.name": "opentelemetry",
+    "telemetry.sdk.version": "1.11.2"
+  },
+  "scope": {
+    "name": "Program"
+  },
+  "severity_number": 9,
+  "severity_text": "Information",
+  "source_type": "opentelemetry",
+  "span_id": "d38409a567a00a1b",
+  "timestamp": "2025-03-20T09:28:55.898969800Z",
+  "trace_id": "78d20b56cfe44f10ccf2795afd546801"
+}
