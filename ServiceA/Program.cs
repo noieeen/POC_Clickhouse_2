@@ -19,22 +19,26 @@ var serviceVersion = "1.0.0";
 var resourceBuilder = ResourceBuilder.CreateDefault()
     .AddService(serviceName: serviceName, serviceVersion: serviceVersion);
 
-var otel = builder.Services.AddOpenTelemetry();
-
 // Add OpenTelemetry tracing
-otel.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
+builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
 {
     tracerProviderBuilder
         .SetResourceBuilder(resourceBuilder)
+        .AddJaegerExporter()
         .AddGrpcClientInstrumentation()
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddSqlClientInstrumentation()
-        .AddOtlpExporter(options => options.Endpoint = new Uri("http://otel-collector:4317"));
+        .AddConsoleExporter() // Export logs to the console
+        .AddOtlpExporter(x =>
+        {
+            x.Endpoint = new Uri("http://otel-collector:4317");
+            x.Protocol = OtlpExportProtocol.Grpc;
+        });
 });
 
 // Add OpenTelemetry metrics
-otel.Services.AddOpenTelemetry().WithMetrics(meterProviderBuilder =>
+builder.Services.AddOpenTelemetry().WithMetrics(meterProviderBuilder =>
 {
     meterProviderBuilder
         .SetResourceBuilder(resourceBuilder)
@@ -46,7 +50,7 @@ otel.Services.AddOpenTelemetry().WithMetrics(meterProviderBuilder =>
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddRuntimeInstrumentation()
-        .AddOtlpExporter(options => options.Endpoint = new Uri("http://otel-collector:4317"));
+        .AddOtlpExporter(x => x.Endpoint = new Uri("http://otel-collector:4317"));
 });
 
 builder.Logging.ClearProviders();
@@ -55,7 +59,7 @@ builder.Logging.ClearProviders();
 builder.Logging.AddOpenTelemetry(options =>
 {
     options.SetResourceBuilder(resourceBuilder);
-    options.AddConsoleExporter(); // Export logs to the console
+    // options.AddConsoleExporter(); // Export logs to the console
     options.AddOtlpExporter(x =>
     {
         x.Endpoint = new Uri("http://otel-collector:4317");

@@ -54,7 +54,7 @@
   # Vector for log processing
   vector:
     image: timberio/vector:0.45.0-debian
-    command: [ "--config=/etc/vector/vector.toml" ]  # Explicit command to use the config
+    command: [ "--config=/etc/vector/vector.toml" ,"--verbose" ]  # Explicit command to use the config
     volumes:
       - ./configs/vector.toml:/etc/vector/vector.toml
     ports:

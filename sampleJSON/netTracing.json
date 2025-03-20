@@ -1,0 +1,37 @@
+{
+  "attributes": {
+    "http.request.method": "GET",
+    "http.response.status_code": 200,
+    "http.route": "/sample",
+    "network.protocol.version": "1.1",
+    "server.address": "localhost",
+    "server.port": 8080,
+    "url.path": "/sample",
+    "url.scheme": "http",
+    "user_agent.original": "PostmanRuntime/7.43.0"
+  },
+  "dropped_attributes_count": 0,
+  "dropped_events_count": 0,
+  "dropped_links_count": 0,
+  "end_time_unix_nano": "2025-03-20T19:05:56.880802900Z",
+  "ingest_timestamp": "2025-03-20T19:05:57.959913549Z",
+  "kind": 2,
+  "name": "GET /sample",
+  "parent_span_id": "",
+  "resources": {
+    "service.instance.id": "b41e81b2-a3a6-40f5-97a7-6d1a985a92ce",
+    "service.name": "ServiceA",
+    "service.version": "1.0.0",
+    "telemetry.sdk.language": "dotnet",
+    "telemetry.sdk.name": "opentelemetry",
+    "telemetry.sdk.version": "1.11.2"
+  },
+  "span_id": "1bfc7f4cb9cbbbfb",
+  "start_time_unix_nano": "2025-03-20T19:05:56.834833Z",
+  "status": {
+    "code": 0,
+    "message": ""
+  },
+  "trace_id": "ed27656a3434d0093eb61f91aef0ad4b",
+  "trace_state": ""
+}
