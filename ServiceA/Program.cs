@@ -26,6 +26,7 @@ otel.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
 {
     tracerProviderBuilder
         .SetResourceBuilder(resourceBuilder)
+        .AddGrpcClientInstrumentation()
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddSqlClientInstrumentation()
@@ -41,6 +42,7 @@ otel.Services.AddOpenTelemetry().WithMetrics(meterProviderBuilder =>
         // Metrics provides by ASP.NET Core in .NET 8
         .AddMeter("Microsoft.AspNetCore.Hosting")
         .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
+        .AddProcessInstrumentation()
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddRuntimeInstrumentation()
@@ -52,8 +54,8 @@ builder.Logging.ClearProviders();
 // Configure logging
 builder.Logging.AddOpenTelemetry(options =>
 {
-    options.AddConsoleExporter(); // Export logs to the console
     options.SetResourceBuilder(resourceBuilder);
+    options.AddConsoleExporter(); // Export logs to the console
     options.AddOtlpExporter(x =>
     {
         x.Endpoint = new Uri("http://otel-collector:4317");
