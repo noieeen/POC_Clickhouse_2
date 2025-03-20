@@ -59,18 +59,21 @@ source = '''
     # Convert back to timestamp for this tutorial.
     .timestamp_str = from_unix_timestamp!(.timestamp)
 
+    event_data = .
+
    . = {
-    "observed_timestamp" : format_timestamp!(.timestamp_str, format: "%Y-%m-%d %H:%M:%S"),
-    "severity_number" :to_int!(.severity_number),
-    "severity_text" : .severity_text,
-    "message" : .message,
-    "scope_name" : .scope.name,
-    "service_name" : .resources.service.name,
-    "span_id" : .span_id,
-    "trace_id" : .trace_id,
-    "source_type" : .source_type,
-    "resources" : .resources,
-    "attributes" : .attributes,
+    "ObservedTimestamp" : format_timestamp!(.timestamp_str, format: "%Y-%m-%d %H:%M:%S"),
+    "SeverityNumber" :to_int!(.severity_number),
+    "SeverityText" : .severity_text,
+    "Body" : encode_json(.message),
+    "ScopeName" : .scope.name,
+    "ServiceName" : .resources.service.name,
+    "SpanId" : .span_id,
+    "TraceId" : .trace_id,
+    "SourceType" : .source_type,
+    "LogResources" : .resources,
+    "LogAttributes" : .attributes,
+    "Log" : encode_json(event_data)
    }
 '''
 #source = """
@@ -183,8 +186,8 @@ source = '''
 [sinks.clickhouse_logs]
 type = "clickhouse"
 inputs = ["otel_logs"]
-database = "logs"
-table = "logs"
+database = "default"
+table = "otel_logs"
 endpoint = "http://clickhouse:8123"
 compression = "gzip"
 #encoding.codec = "json"  # Use JSON format for structured logs

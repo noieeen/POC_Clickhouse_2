@@ -1,5 +1,6 @@
 -- Create database for logs
-CREATE DATABASE IF NOT EXISTS logs;
+CREATE DATABASE IF NOT EXISTS default;
+DROP TABLE IF EXISTS default.otel_logs;
 DROP TABLE IF EXISTS logs.logs;
 -- 
 -- -- Create table for application logs
@@ -29,20 +30,21 @@ DROP TABLE IF EXISTS logs.logs;
 --     ORDER BY timestamp;
 
 
-CREATE TABLE logs.logs
+CREATE TABLE default.otel_logs
 (
-    timestamp DateTime64(9) DEFAULT now(),
-    observed_timestamp  TIMESTAMP DEFAULT NULL,
-    message String,
-    severity_text String,
-    severity_number UInt8,
-    resources Map(String, String),
-    attributes Map(String, String),
-    trace_id String,
-    span_id String,
-    scope_name String,
-    service_name String,
-    log String
+    Timestamp DateTime64(9) DEFAULT now(),
+    ObservedTimestamp  TIMESTAMP DEFAULT NULL,
+    Body String,
+    SeverityText String,
+    SeverityNumber UInt8,
+    LogResources Map(String, String),
+    LogAttributes Map(String, String),
+    TraceId String,
+    SpanId String,
+    ScopeName String,
+    ServiceName String,
+    SourceType String,
+    Log String
 ) ENGINE = MergeTree()
-PARTITION BY toYYYYMM(timestamp)
-ORDER BY (timestamp, service_name, severity_number);
+PARTITION BY toYYYYMM(Timestamp)
+ORDER BY (Timestamp, ServiceName, SeverityNumber);
