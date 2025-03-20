@@ -62,6 +62,8 @@
       - "9598:9598"  # Vector metrics endpoint for Prometheus  
     networks:
       - monitoring-network
+    depends_on:
+      - clickhouse
 
   # ClickHouse for log storage
   clickhouse:
