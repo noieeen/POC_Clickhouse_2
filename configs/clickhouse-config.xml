@@ -54,24 +54,16 @@
         <errors>true</errors>
     </prometheus>
 
+    <!--            If you need native JSON queries in ClickHouse.-->
+    <!--    <enable_json_type>1</enable_json_type>-->
+
     <!--    Section `<prometheus.handlers>` can be used to make more extended handlers.-->
     <!--    This section is similar to [<http_handlers>](/interfaces/http) but works for prometheus protocols:-->
 
- 
-    <!--    <prometheus>-->
-    <!--        <port>9363</port>-->
-    <!--        <handlers>-->
-    <!--            <my_rule_1>-->
-    <!--                <url>/metrics</url>-->
-    <!--                <handler>-->
-    <!--                    <type>expose_metrics</type>-->
-    <!--                    <metrics>true</metrics>-->
-    <!--                    <asynchronous_metrics>true</asynchronous_metrics>-->
-    <!--                    <events>true</events>-->
-    <!--                    <errors>true</errors>-->
-    <!--                </handler>-->
-    <!--            </my_rule_1>-->
-    <!--        </handlers>-->
-    <!--    </prometheus>-->
+
+    <yandex>
+        <max_insert_block_size>1048576</max_insert_block_size>
+        <max_memory_usage>2000000000</max_memory_usage>
+    </yandex>
 
 </clickhouse>

@@ -1,7 +1,4 @@
-﻿version: '3.8'
-
-services:
-  # Service A: Main application
+﻿services:
   service_a:
     image: noieeen/servicea
     build:
@@ -15,8 +12,9 @@ services:
       - otel-collector
     networks:
       - monitoring-network
-
-  # OpenTelemetry Collector for monitoring
+  
+  
+  # OpenTelemetry Collector
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     command: [ "--config=/etc/otelcol-contrib/config.yaml" ]
@@ -56,12 +54,12 @@ services:
   # Vector for log processing
   vector:
     image: timberio/vector:0.45.0-debian
-    command: [ "--config=/etc/vector/vector.toml" ]
+    command: [ "--config=/etc/vector/vector.toml"  ]  # Explicit command to use the config [,"--verbose"]
     volumes:
       - ./configs/vector.toml:/etc/vector/vector.toml
     ports:
       - "8383:8383"  # Vector API server
-      - "9598:9598"  # Vector metrics endpoint for Prometheus
+      - "9598:9598"  # Vector metrics endpoint for Prometheus  
     networks:
       - monitoring-network
     depends_on:
@@ -86,6 +84,18 @@ services:
     networks:
       - monitoring-network
   
+  #  # Exports Traces to Tempo
+  #  tempo:
+  #    image: grafana/tempo:latest
+  #    command: [ "-config.file=/etc/tempo.yaml" ]
+  #    volumes:
+  #      - ./configs/tempo.yaml:/etc/tempo.yaml
+  #      - ./data/tempo-data:/tmp/tempo
+  #    ports:
+  #      - "3200"  # tempo
+  #      - "4317"  # otlp grpc
+  #      - "4318"  # otlp http
+
   # Grafana for visualization
   grafana:
     image: grafana/grafana:latest

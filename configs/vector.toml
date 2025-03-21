@@ -24,33 +24,25 @@ address = "0.0.0.0:4317"
 # OpenTelemetry HTTP source
 [sources.otel.http]
 address = "0.0.0.0:4318"
-#headers = []
+headers = []
 #A value of 0.1 means that the actual duration will be between 90% and 110% of the specified maximum duration.
-#[sources.otel.http.keepalive]
-#max_connection_age_jitter_factor = 0.1
-#max_connection_age_secs = 300
+[sources.otel.http.keepalive]
+max_connection_age_jitter_factor = 0.1
+max_connection_age_secs = 300
 
-## Add a transform to process logs
-#[transforms.otel_logs]
-#type = "remap"
-#inputs = ["otel.logs"]
-#source = '''
-## Extract relevant fields
-#. = parse_json!(string!(.message))
-#'''
 
 # Add a transform to process logs
 [transforms.otel_traces]
 type = "remap"
 inputs = ["otel.traces"]
 source = '''
-trace_data = .
-. = {
-    "Body" : encode_json(trace_data),
-    "LogAttributes" : .attributes,
-    "LogResources" : .resources
-}
-    
+#trace_data = .
+#. = {
+#    "Body" : encode_json(trace_data),
+#    "LogAttributes" : .attributes,
+#    "LogResources" : .resources
+#}
+  .  
 '''
 
 # Optional: Transformation to add labels or filter logs
@@ -92,45 +84,26 @@ source = '''
 '''
 
 
-
-
-## Expose to console
-#[sinks.console_logs]
-#type = "console"
-#inputs = ["otel_logs"]
-#encoding.codec = "json"
-#target = "stdout" #[stderr, stdout]
-
 [sinks.console_traces]
 type = "console"
-inputs = ["otel_traces"]
+inputs = ["otel_logs", "otel_traces"]
 encoding.codec = "json"
 target = "stdout" #[stderr, stdout]
 
-## Data sinks
-#[sinks.clickhouse_logs]
-#type = "clickhouse"
-#inputs = ["otel_logs"]
-#database = "default"
-#table = "otel_logs"
-#endpoint = "http://clickhouse:8123"
-#compression = "gzip"
-##encoding.codec = "json"  # Use JSON format for structured logs
-#skip_unknown_fields = true
-
 # Data sinks
-[sinks.clickhouse_traces]
+[sinks.clickhouse_otel_traces]
 type = "clickhouse"
 inputs = ["otel_traces"]
 database = "default"
-table = "traces"
+table = "otel_traces"
 endpoint = "http://clickhouse:8123"
 compression = "gzip"
-#encoding.json.pretty = "true"  # Use JSON format for structured logs
-#skip_unknown_fields = true
+#encoding.codec = "json"  # Use JSON format for structured logs
+skip_unknown_fields = true
+
 
 # Data sinks
-[sinks.clickhouse_logs]
+[sinks.clickhouse_otel_logs]
 type = "clickhouse"
 inputs = ["otel_logs"]
 database = "default"
@@ -140,13 +113,11 @@ compression = "gzip"
 #encoding.codec = "json"  # Use JSON format for structured logs
 skip_unknown_fields = true
 
-
-
-## Health checks
-#[sinks.clickhouse_logs.healthcheck]
-#enabled = true
+# Health checks
+[sinks.clickhouse_otel_logs.healthcheck]
+enabled = true
 
 # Health checks
-#[sinks.clickhouse_traces.healthcheck]
-#enabled = true
+[sinks.clickhouse_otel_traces.healthcheck]
+enabled = true
 
