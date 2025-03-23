@@ -42,7 +42,7 @@ datasources:
 #        - name: X-Example-Secure-Header
 #          secure: true
       logs:
-        defaultDatabase: default
+        defaultDatabase: otel
         defaultTable: otel_logs
 #        otelEnabled: false
 #        otelVersion: latest
@@ -50,7 +50,7 @@ datasources:
 #        levelColumn: <string>
 #        messageColumn: <string>
       traces:
-        defaultDatabase: default
+        defaultDatabase: otel
 #        defaultTable: otel_traces
 #        otelEnabled: false
 #        otelVersion: latest

@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +13,7 @@ using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 // Define service name and version for telemetry
-var serviceName = "ServiceA";
+var serviceName = Assembly.GetCallingAssembly().GetName().Name ?? "Service";
 var serviceVersion = "1.0.0";
 
 // Configure resource for OpenTelemetry

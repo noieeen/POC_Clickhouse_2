@@ -5,6 +5,15 @@ receivers:
         endpoint: "0.0.0.0:4317"
       http:
         endpoint: "0.0.0.0:4318"
+        cors:
+          allowed_origins:
+            - "http://*"
+            - "https://*"
+  
+#  redis:
+#    endpoint: "0.0.0.0:6379"
+#    collection_interval: 10s
+##    password: ${env:REDIS_PASSWORD}
 
 processors:
   batch:
@@ -24,6 +33,7 @@ processors:
     limit_mib: 1800
     spike_limit_mib: 500
 
+### EXPORTER
 exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
@@ -33,6 +43,9 @@ exporters:
     endpoint: "jaeger:4317"
     tls:
       insecure: true
+  
+#  jaeger_storage_exporter:
+#    trace_storage: some_storage
 
   otlp/vector:
     endpoint: "vector:4317"
@@ -56,18 +69,31 @@ exporters:
       max_elapsed_time: 300s
 
 
+connectors:
+  spanmetrics:
+    namespace: span.metrics
+
 service:
   pipelines:
     metrics:
       receivers: [ otlp ]
       processors: [ memory_limiter, batch ]
       exporters: [ prometheus ]
-    
-    traces:
+      
+    metrics/spanmetrics:
+      receivers: [ spanmetrics ]
+      exporters: [ prometheus ]
+      
+    traces/jaeger:
       receivers: [ otlp ]
-      #      processors: [ memory_limiter, batch ]
-      processors: [ memory_limiter/clickhouse, batch/clickhouse ]
-      exporters: [ clickhouse ]
+      processors: [ memory_limiter, batch ]
+      exporters: [ otlp/jaeger, spanmetrics ]
+    
+    #    traces:
+    #      receivers: [ otlp ]
+    #      #      processors: [ memory_limiter, batch ]
+    #      processors: [ memory_limiter/clickhouse, batch/clickhouse ]
+    #      exporters: [ clickhouse ]
     
     logs:
       receivers: [ otlp ]

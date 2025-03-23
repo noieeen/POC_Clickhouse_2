@@ -3,7 +3,7 @@ version: "3.8"
 services:
   service_a:
     build:
-      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2"
+      context: "C:\\Users\\Noie\\Desktop\\dev\\POC_Clickhouse_2"
       dockerfile: "ServiceA/Dockerfile"
       target: "base"
     command: []
@@ -16,7 +16,44 @@ services:
     image: "noieeen/servicea:dev"
     ports: []
     volumes:
-    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/ServiceA:/app:rw"
-    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2:/src:rw"
-    - "/Users/tharinchemchan/.nuget/packages:/home/app/.nuget/packages"
+    - "C:\\Users\\Noie\\Desktop\\dev\\POC_Clickhouse_2\\ServiceA:/app:rw"
+    - "C:\\Users\\Noie\\Desktop\\dev\\POC_Clickhouse_2:/src:rw"
+    - "C:\\Users\\Noie\\.nuget\\packages:/home/app/.nuget/packages"
+    working_dir: "/app"
+  service_auth:
+    build:
+      context: "C:\\Users\\Noie\\Desktop\\dev\\POC_Clickhouse_2"
+      dockerfile: "AuthService/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/AuthService.dll"
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "noieeen/serviceauth:dev"
+    ports: []
+    volumes:
+    - "C:\\Users\\Noie\\Desktop\\dev\\POC_Clickhouse_2\\AuthService:/app:rw"
+    - "C:\\Users\\Noie\\Desktop\\dev\\POC_Clickhouse_2:/src:rw"
+    - "C:\\Users\\Noie\\.nuget\\packages:/home/app/.nuget/packages"
+    working_dir: "/app"
+  service_b:
+    build:
+      context: "C:\\Users\\Noie\\Desktop\\dev\\POC_Clickhouse_2"
+      dockerfile: "ServiceB/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/ServiceB.dll"
+    environment:
+      ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net8.0/ServiceB.staticwebassets.runtime.CT.json"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "noieeen/serviceb:dev"
+    ports: []
+    volumes:
+    - "C:\\Users\\Noie\\Desktop\\dev\\POC_Clickhouse_2\\ServiceB:/app:rw"
+    - "C:\\Users\\Noie\\Desktop\\dev\\POC_Clickhouse_2:/src:rw"
+    - "C:\\Users\\Noie\\.nuget\\packages:/home/app/.nuget/packages"
     working_dir: "/app"
