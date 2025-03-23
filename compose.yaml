@@ -29,6 +29,8 @@ services:
       - "13133:13133" # Health check
     networks:
       - monitoring-network
+    depends_on:
+      - clickhouse
 
   # Prometheus for metrics storage
   prometheus:
@@ -56,7 +58,7 @@ services:
   # Vector for log processing
   vector:
     image: timberio/vector:0.45.0-debian
-    command: [ "--config=/etc/vector/vector.toml" ]
+    command: [ "--config=/etc/vector/vector.toml","--verbose" ]
     volumes:
       - ./configs/vector.toml:/etc/vector/vector.toml
     ports:

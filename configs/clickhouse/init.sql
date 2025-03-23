@@ -1,96 +1,84 @@
--- Create database for logs
-CREATE DATABASE IF NOT EXISTS default;
-
-CREATE DATABASE IF NOT EXISTS logs;
-       
-    SET enable_json_type = 1;
-    SET max_insert_block_size = 1048576;
-        
-DROP TABLE IF EXISTS logs.logs;
-DROP TABLE IF EXISTS logs.dummy;
-DROP TABLE IF EXISTS logs.otel_traces;
-
--- -- LOGS      
-DROP TABLE IF EXISTS default.otel_logs;
--- -- TRACES
-DROP TABLE IF EXISTS default.otel_traces;
-
-CREATE TABLE IF NOT EXISTS default.otel_logs
+CREATE
+DATABASE IF NOT EXISTS otel;
+-- USE otel;
+DROP TABLE IF EXISTS otel.otel_logs;
+DROP TABLE IF EXISTS otel.otel_traces;
+-- Create logs table
+CREATE TABLE otel.otel_logs
 (
-    Timestamp         DateTime64(9) DEFAULT now(),
-    ObservedTimestamp TIMESTAMP DEFAULT NULL,
-    Body              String,
-    SeverityText      String,
-    SeverityNumber    UInt8,
-    LogResources      Map(String, String),
-    LogAttributes     Map(String, String),
-    TraceId           String,
-    SpanId            String,
-    ScopeName         String,
-    ServiceName       String,
-    SourceType        String,
-    Log               String
+    timestamp          DateTime CODEC(Delta, ZSTD),
+    traceId            String CODEC(ZSTD),
+    spanId             String CODEC(ZSTD),
+    traceFlags         UInt32 CODEC(ZSTD),
+    severityText       LowCardinality(String) CODEC(ZSTD),
+    severityNumber     Int32 CODEC(ZSTD),
+    body               String CODEC(ZSTD),
+    resourceAttributes Map(String, String) CODEC(ZSTD),
+    logAttributes      Map(String, String) CODEC(ZSTD),
+    INDEX              idx_traceId traceId TYPE bloom_filter GRANULARITY 1
 ) ENGINE = MergeTree()
-PARTITION BY toYYYYMM(Timestamp)
-ORDER BY (Timestamp, ServiceName, SeverityNumber);
+ORDER BY (timestamp, traceId, spanId)
+TTL timestamp + INTERVAL 30 DAY;
 
-CREATE TABLE IF NOT EXISTS logs.traces
-(
-    id UInt64,
-    Timestamp         DateTime64(9) DEFAULT now(),
-    ObservedTimestamp TIMESTAMP DEFAULT NULL,
-    Body              String,
---     LogResources      Map(String, String),
---     LogAttributes     Map(String, String)
+-- Create traces table
+CREATE TABLE IF NOT EXISTS otel.otel_traces (
+                                           Timestamp DateTime64(9) CODEC(Delta, ZSTD(1)),
+    TraceId String CODEC(ZSTD(1)),
+    SpanId String CODEC(ZSTD(1)),
+    ParentSpanId String CODEC(ZSTD(1)),
+    TraceState String CODEC(ZSTD(1)),
+    SpanName LowCardinality(String) CODEC(ZSTD(1)),
+    SpanKind LowCardinality(String) CODEC(ZSTD(1)),
+    ServiceName LowCardinality(String) CODEC(ZSTD(1)),
+    ResourceAttributes Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+    ScopeName String CODEC(ZSTD(1)),
+    ScopeVersion String CODEC(ZSTD(1)),
+    SpanAttributes Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+    Duration UInt64 CODEC(ZSTD(1)),
+    StatusCode LowCardinality(String) CODEC(ZSTD(1)),
+    StatusMessage String CODEC(ZSTD(1)),
+    Events Nested (
+                      Timestamp DateTime64(9),
+    Name LowCardinality(String),
+    Attributes Map(LowCardinality(String), String)
+    ) CODEC(ZSTD(1)),
+    Links Nested (
+                     TraceId String,
+                     SpanId String,
+                     TraceState String,
+                     Attributes Map(LowCardinality(String), String)
+    ) CODEC(ZSTD(1)),
+    INDEX idx_trace_id TraceId TYPE bloom_filter(0.001) GRANULARITY 1,
+    INDEX idx_res_attr_key mapKeys(ResourceAttributes) TYPE bloom_filter(0.01) GRANULARITY 1,
+    INDEX idx_res_attr_value mapValues(ResourceAttributes) TYPE bloom_filter(0.01) GRANULARITY 1,
+    INDEX idx_span_attr_key mapKeys(SpanAttributes) TYPE bloom_filter(0.01) GRANULARITY 1,
+    INDEX idx_span_attr_value mapValues(SpanAttributes) TYPE bloom_filter(0.01) GRANULARITY 1,
+    INDEX idx_duration Duration TYPE minmax GRANULARITY 1
     ) ENGINE = MergeTree()
---     PARTITION BY toYYYYMM(Timestamp)
-    ORDER BY (id,Timestamp);
+    PARTITION BY toDate(Timestamp)
+    ORDER BY (ServiceName, SpanName, toDateTime(Timestamp))
+    TTL toDate(Timestamp) + toIntervalDay(180)
+    SETTINGS index_granularity=8192, ttl_only_drop_parts = 1;
 
 
--- CREATE TABLE IF NOT EXISTS default.otel_traces
--- (
---     Timestamp         DateTime64(9) DEFAULT now(),
---     TraceId                String,
---     SpanId                 String,
---     ParentSpanId           String,
---     Name                   String,
---     Kind                   UInt8,
---     StartTimeUnixNano      DateTime64(9),
---     EndTimeUnixNano        DateTime64(9),
---     IngestTimestamp        DateTime64(9),
---     StatusCode             UInt8,
---     StatusMessage          String,
---     TraceState             String,
---     DroppedAttributesCount UInt32,
---     DroppedEventsCount     UInt32,
---     DroppedLinksCount      UInt32,
---     LogAttributes          Map(String, String),
---     LogResources           Map(String, String)
--- ) ENGINE = MergeTree()
--- PARTITION BY toYYYYMM(Timestamp)
--- ORDER BY (Timestamp, TraceId, SpanId);
+CREATE TABLE IF NOT EXISTS otel_traces_trace_id_ts (
+                                                       TraceId String CODEC(ZSTD(1)),
+    Start DateTime CODEC(Delta, ZSTD(1)),
+    End DateTime CODEC(Delta, ZSTD(1)),
+    INDEX idx_trace_id TraceId TYPE bloom_filter(0.01) GRANULARITY 1
+    ) ENGINE = MergeTree()
+    PARTITION BY toDate(Start)
+    ORDER BY (TraceId, Start)
+    TTL toDate(Start) + toIntervalDay(180)
+    SETTINGS index_granularity=8192, ttl_only_drop_parts = 1;
 
-CREATE TABLE logs.dummy
-(
-    Id UInt64,
-    Timestamp         DateTime64(9) DEFAULT now(),
-    TraceId              String,
-    Body                 String
-) ENGINE = MergeTree()
-PARTITION BY toYYYYMM(Timestamp)
-ORDER BY (Id, Timestamp);
 
-CREATE TABLE default.otel_traces (
-                                     Timestamp DateTime64(9) DEFAULT now(),
-                                     trace_id String,
-                                     span_id String,
-                                     parent_span_id String,
-                                     name String,
-                                     kind UInt8,
-                                     start_time DateTime64(9),
-                                     end_time DateTime64(9),
-                                     attributes JSON,
-                                     status_code UInt8,
-                                     status_message String
-) ENGINE = MergeTree()
-ORDER BY (Timestamp, trace_id, span_id);
+CREATE MATERIALIZED VIEW IF NOT EXISTS otel_traces_trace_id_ts_mv
+TO otel_traces_trace_id_ts
+AS SELECT
+              TraceId,
+              min(Timestamp) as Start,
+              max(Timestamp) as End
+   FROM otel_traces
+   WHERE TraceId != ''
+   GROUP BY TraceId;

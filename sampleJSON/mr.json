@@ -1,0 +1,36 @@
+{
+  "attributes": {
+    "http.request.method": "GET",
+    "http.response.status_code": 200,
+    "network.protocol.version": "1.1",
+    "server.address": "service_a",
+    "server.port": 8080,
+    "url.path": "/metrics",
+    "url.scheme": "http",
+    "user_agent.original": "Prometheus/3.2.1"
+  },
+  "dropped_attributes_count": 0,
+  "dropped_events_count": 0,
+  "dropped_links_count": 0,
+  "end_time_unix_nano": "2025-03-21T14:08:04.006397600Z",
+  "ingest_timestamp": "2025-03-21T14:08:04.611720925Z",
+  "kind": 2,
+  "name": "GET",
+  "parent_span_id": "",
+  "resources": {
+    "service.instance.id": "e2f53d28-15e3-426a-94dd-4a778401976e",
+    "service.name": "ServiceA",
+    "service.version": "1.0.0",
+    "telemetry.sdk.language": "dotnet",
+    "telemetry.sdk.name": "opentelemetry",
+    "telemetry.sdk.version": "1.11.2"
+  },
+  "span_id": "234f345d0162f8ad",
+  "start_time_unix_nano": "2025-03-21T14:08:03.979221400Z",
+  "status": {
+    "code": 0,
+    "message": ""
+  },
+  "trace_id": "367f1cbface01250e73703c2f5104e3d",
+  "trace_state": ""
+}

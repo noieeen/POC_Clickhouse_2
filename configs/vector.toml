@@ -16,10 +16,13 @@ address = "0.0.0.0:9598"
 # OpenTelemetry source
 [sources.otel]
 type = "opentelemetry"
+log_namespace = true
+#ignore_older_secs = 8400 # 1day
+#encoding = "protobuf"
 
 [sources.otel.grpc]
 address = "0.0.0.0:4317"
-#encoding = "protobuf"
+
 
 # OpenTelemetry HTTP source
 [sources.otel.http]
@@ -42,7 +45,7 @@ source = '''
 #    "LogAttributes" : .attributes,
 #    "LogResources" : .resources
 #}
-  .  
+  .  = {"dropped_attributes_count": .dropped_attributes_count}
 '''
 
 # Optional: Transformation to add labels or filter logs
@@ -84,22 +87,27 @@ source = '''
 '''
 
 
-[sinks.console_traces]
-type = "console"
-inputs = ["otel_logs", "otel_traces"]
-encoding.codec = "json"
-target = "stdout" #[stderr, stdout]
+#[sinks.console_traces]
+#type = "console"
+#inputs = ["otel_traces"]
+##inputs = ["otel_logs", "otel_traces"]
+#encoding.codec = "json"
+#target = "stdout" #[stderr, stdout]
 
 # Data sinks
-[sinks.clickhouse_otel_traces]
-type = "clickhouse"
-inputs = ["otel_traces"]
-database = "default"
-table = "otel_traces"
-endpoint = "http://clickhouse:8123"
-compression = "gzip"
-#encoding.codec = "json"  # Use JSON format for structured logs
-skip_unknown_fields = true
+#[sinks.clickhouse_otel_traces]
+#type = "clickhouse"
+#inputs = ["otel_traces"]
+#database = "logs"
+#table = "dummy"
+#endpoint = "http://clickhouse:8123"
+##compression = "gzip"
+##encoding  = "json"
+#skip_unknown_fields = true
+#
+#[sinks.clickhouse_otel_traces.request]
+#rate_limit_duration_secs = 1
+#rate_limit_num = 100
 
 
 # Data sinks
@@ -117,7 +125,7 @@ skip_unknown_fields = true
 [sinks.clickhouse_otel_logs.healthcheck]
 enabled = true
 
-# Health checks
-[sinks.clickhouse_otel_traces.healthcheck]
-enabled = true
+## Health checks
+#[sinks.clickhouse_otel_traces.healthcheck]
+#enabled = true
 
