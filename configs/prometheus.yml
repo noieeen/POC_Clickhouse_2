@@ -58,15 +58,15 @@ scrape_configs:
           group: 'service'
   
   ### >MSSQL
-  - job_name: 'mssql'
-    scrape_interval: 5s
-    static_configs:
-      - targets: [ 'mssql:1433' ]
-        labels:
-          group: 'infra'
+#  - job_name: 'mssql-exporter'
+#    scrape_interval: 5s
+#    static_configs:
+#      - targets: [ 'mssql-exporter:4000' ]
+#        labels:
+#          group: 'infra'
   
   ### >REDIS
-  - job_name: redis-exporter
+  - job_name: 'redis-exporter'
     scrape_interval: 15s
     static_configs:
       - targets: [ 'redis-exporter:9121' ]

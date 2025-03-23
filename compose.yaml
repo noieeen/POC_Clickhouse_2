@@ -54,20 +54,19 @@ services:
       interval: 1s
       timeout: 3s
       retries: 5
-    command: [ "redis" ]
+    command: [ "redis-server" ] # Importance
     environment:
       - REDIS_REPLICATION_MODE=master
       - REDIS_PASSWORD=my_master_password
     volumes:
-      - ./data/redis_data:/data
+      - ./data/redis_data:/bitnami/redis/data
+    #      - ./configs/redis:/opt/bitnami/scripts/redis/entrypoint.s
     ports:
       - "6379:6379"
     depends_on:
       - prometheus
     networks:
       - monitoring-network
-      - redis-exporter
-  
   redis-exporter:
     image: bitnami/redis-exporter:latest
     ports:
@@ -82,8 +81,6 @@ services:
       - prometheus
     networks:
       - monitoring-network
-      - redis-exporter
-  
   
   # SQL_Server
   mssql:
@@ -107,9 +104,21 @@ services:
       - ./data/mssql-data:/var/opt/mssql/data
       - ./log:/var/opt/mssql/log
       - ./secrets:/var/opt/mssql/secrets
-
     networks:
       - monitoring-network
+  
+  #  mssql-exporter:
+  #    image: quay.io/prometheus/mssql-exporter:latest
+  #    container_name: mssql-exporter
+  #    ports:
+  #      - "4000:4000"
+  #    environment:
+  #      - DATA_SOURCE_NAME=sqlserver://sa:MyPass@word90_@mssql-db:1433?database=master&encrypt=disable
+  #    depends_on:
+  #      - mssql
+  #    networks:
+  #      - monitoring-network
+  
   
   #  mssql.configurator:
   #      image: mcr.microsoft.com/mssql/server:2022-latest
@@ -137,7 +146,8 @@ services:
     networks:
       - monitoring-network
     depends_on:
-      - clickhouse
+      clickhouse:
+        condition: service_healthy
 
   # Prometheus for metrics storage
   prometheus:
@@ -179,6 +189,11 @@ services:
   # ClickHouse for log storage
   clickhouse:
     image: clickhouse/clickhouse-server:latest
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -s http://localhost:8123/ping | grep -q 'Ok.'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - ./data/clickhouse-data:/var/lib/clickhouse
       - ./configs/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
