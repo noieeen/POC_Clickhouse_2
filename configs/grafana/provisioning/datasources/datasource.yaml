@@ -30,8 +30,8 @@ datasources:
 #      tlsSkipVerify: <boolean>
 #      tlsAuth: <boolean>
 #      tlsAuthWithCACert: <boolean>
-      defaultDatabase: logs
-      defaultTable: logs
+      defaultDatabase: otel
+      defaultTable: otel_logs
 #      dialTimeout: 10
 #      queryTimeout: 60
 #      validateSql: false
@@ -44,15 +44,15 @@ datasources:
       logs:
         defaultDatabase: otel
         defaultTable: otel_logs
-#        otelEnabled: false
+        otelEnabled: true
 #        otelVersion: latest
 #        timeColumn: <string>
 #        levelColumn: <string>
 #        messageColumn: <string>
       traces:
         defaultDatabase: otel
-#        defaultTable: otel_traces
-#        otelEnabled: false
+        defaultTable: otel_traces
+        otelEnabled: true
 #        otelVersion: latest
 #        traceIdColumn: <string>
 #        spanIdColumn: <string>
