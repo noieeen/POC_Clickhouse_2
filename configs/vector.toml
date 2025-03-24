@@ -35,18 +35,19 @@ max_connection_age_secs = 300
 
 
 # Add a transform to process logs
-[transforms.otel_traces]
-type = "remap"
-inputs = ["otel.traces"]
-source = '''
-trace_data = .
-#. = {
-#    "Body" : encode_json(trace_data),
-#    "LogAttributes" : .attributes,
-#    "LogResources" : .resources
-#}
-  .  = {"message": encode_json(trace_data)}
-'''
+##### VECTOR CAN NOT FORWERD TRACES ####
+#[transforms.otel_traces]
+#type = "remap"
+#inputs = ["otel.traces"]
+#source = '''
+#trace_data = .
+##. = {
+##    "Body" : encode_json(trace_data),
+##    "LogAttributes" : .attributes,
+##    "LogResources" : .resources
+##}
+#  .  = {"message": encode_json(trace_data)}
+#'''
 
 # Optional: Transformation to add labels or filter logs
 [transforms.otel_logs]
@@ -87,23 +88,23 @@ source = '''
 '''
 
 
-[sinks.console_traces]
-type = "console"
-inputs = ["otel_traces"]
-#inputs = ["otel_logs", "otel_traces"]
-encoding.codec = "json"
-target = "stdout" #[stderr, stdout]
+#[sinks.console_traces]
+#type = "console"
+#inputs = ["otel_traces"]
+##inputs = ["otel_logs", "otel_traces"]
+#encoding.codec = "json"
+#target = "stdout" #[stderr, stdout]
 
-# Data sinks
-[sinks.clickhouse_otel_traces]
-type = "clickhouse"
-inputs = ["otel_traces"]
-database = "logs"
-table = "dummy"
-endpoint = "http://clickhouse:8123"
-compression = "gzip"
-#encoding  = "json"
-skip_unknown_fields = true
+## Data sinks
+#[sinks.clickhouse_otel_traces]
+#type = "clickhouse"
+#inputs = ["otel_traces"]
+#database = "logs"
+#table = "dummy"
+#endpoint = "http://clickhouse:8123"
+#compression = "gzip"
+##encoding  = "json"
+#skip_unknown_fields = true
 
 [sinks.clickhouse_otel_traces.request]
 rate_limit_duration_secs = 1

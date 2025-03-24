@@ -36,7 +36,7 @@ processors:
   resource:
     attributes:
       - key: service.name
-        value: "serviceName"
+        value: "OTEL Service"
         action: upsert
 
 ### EXPORTER
@@ -100,6 +100,11 @@ service:
       processors: [ memory_limiter/clickhouse, resourcedetection/system, resource, batch ]
       exporters: [ clickhouse ]
     
+    logs/clickhouse:
+      receivers: [ otlp ]
+      processors: [ memory_limiter/clickhouse, resourcedetection/system, resource, batch ]
+      exporters: [ clickhouse ]
+    
     #    traces:
     #      receivers: [ otlp ]
     #      #      processors: [ memory_limiter, batch ]
@@ -112,8 +117,8 @@ service:
     #      exporters: [ clickhouse ]
     
     
-    logs/vector:
-      receivers: [ otlp ]
-      processors: [ memory_limiter, batch ]
-      exporters: [ otlp/vector ]
+#    logs/vector:
+#      receivers: [ otlp ]
+#      processors: [ memory_limiter, batch ]
+#      exporters: [ otlp/vector ]
       
