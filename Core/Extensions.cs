@@ -1,13 +1,17 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
-namespace Microsoft.Extensions.Hosting;
+namespace Core;
 
 // Adds common .NET Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
 // This project should be referenced by each service project in your solution.
@@ -46,14 +50,21 @@ public static class Extensions
             .WithMetrics(metrics =>
             {
                 metrics.AddAspNetCoreInstrumentation()
+                    .AddPrometheusExporter()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddRuntimeInstrumentation()
+                    // Metrics provides by ASP.NET Core in .NET 8
+                    .AddMeter("Microsoft.AspNetCore.Hosting")
+                    .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
+                    // Metrics provided by System.Net libraries
+                    .AddMeter("System.Net.Http")
+                    .AddMeter("System.Net.NameResolution");
             })
             .WithTracing(tracing =>
             {
                 tracing.AddAspNetCoreInstrumentation()
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
-                    //.AddGrpcClientInstrumentation()
+                    .AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation();
             });
 
@@ -62,21 +73,51 @@ public static class Extensions
         return builder;
     }
 
-    private static IHostApplicationBuilder AddOpenTelemetryExporters(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder AddOpenTelemetryResource(this IHostApplicationBuilder builder,
+        ResourceBuilder resourceBuilder)
     {
-        var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
+        var otelConnectionString = builder.Configuration.GetConnectionString("OTLP_ENDPOINT_URL") ??
+                                   throw new ArgumentNullException(
+                                       "builder.Configuration.GetConnectionString(\"OTLP_ENDPOINT_URL\")");
 
-        if (useOtlpExporter)
+        if (string.IsNullOrWhiteSpace((otelConnectionString)))
         {
             builder.Services.AddOpenTelemetry().UseOtlpExporter();
+            builder.Services.AddOpenTelemetry().WithMetrics(options => options.SetResourceBuilder(resourceBuilder));
+            builder.Services.AddOpenTelemetry().WithTracing(options => options.SetResourceBuilder(resourceBuilder));
+            builder.Services.AddOpenTelemetry().WithLogging(options => options.SetResourceBuilder(resourceBuilder));
         }
 
-        // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
-        //if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
-        //{
-        //    builder.Services.AddOpenTelemetry()
-        //       .UseAzureMonitor();
-        //}
+        return builder;
+    }
+
+    private static IHostApplicationBuilder AddOpenTelemetryExporters(this IHostApplicationBuilder builder)
+    {
+        var otelConnectionString = builder.Configuration.GetConnectionString("OTLP_ENDPOINT_URL") ??
+                                   throw new ArgumentNullException(
+                                       "builder.Configuration.GetConnectionString(\"OTLP_ENDPOINT_URL\")");
+
+        if (string.IsNullOrWhiteSpace((otelConnectionString)))
+        {
+            builder.Services.AddOpenTelemetry().UseOtlpExporter();
+            builder.Services.AddOpenTelemetry().WithMetrics(options => options.AddOtlpExporter(x =>
+            {
+                x.Endpoint = new Uri(otelConnectionString);
+                x.Protocol = OtlpExportProtocol.Grpc;
+            }));
+
+            builder.Services.AddOpenTelemetry().WithTracing(options => options.AddOtlpExporter(x =>
+            {
+                x.Endpoint = new Uri(otelConnectionString);
+                x.Protocol = OtlpExportProtocol.Grpc;
+            }));
+
+            builder.Services.AddOpenTelemetry().WithLogging(options => options.AddOtlpExporter(x =>
+            {
+                x.Endpoint = new Uri(otelConnectionString);
+                x.Protocol = OtlpExportProtocol.Grpc;
+            }));
+        }
 
         return builder;
     }

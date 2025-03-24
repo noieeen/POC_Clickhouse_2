@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
+using AuthService.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -111,5 +112,24 @@ app.MapGet("/sample", async (ILogger<Program> logger) =>
     await Task.Delay(new Random().Next(10, 100));
 
     return "Hello from monitored .NET app!";
+});
+
+app.MapGet("/login", async (ILogger<Program> logger) =>
+{
+    var activitySource = new ActivitySource(serviceName);
+    using var activity = activitySource.StartActivity("AuthOperation");
+
+    activity?.SetTag("auth.importance", "high");
+
+    var auth = new Auth();
+    var success = await auth.Login("username", "password");
+
+    // Log something
+    logger.LogInformation("Login Resp :{Result}", success ? "Success" : "Fail");
+
+    // Simulate some work
+    await Task.Delay(new Random().Next(10, 100));
+
+    return "Success";
 });
 app.Run();

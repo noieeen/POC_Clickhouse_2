@@ -50,42 +50,42 @@ max_connection_age_secs = 300
 #'''
 
 # Optional: Transformation to add labels or filter logs
-[transforms.otel_logs]
-type = "remap"
-inputs = ["otel.logs"]
-source = '''
-    parsed_timestamp, err = parse_timestamp(.observed_timestamp, format: "%Y-%m-%dT%H:%M:%S.%fZ")
-
-    # Check if the conversion was successful. Note here that all errors must be handled, more on that later.
-    if err == null {
-       # Note that the `to_unix_timestamp` expects a `timestamp` argument.
-       # The following will compile because `parse_timestamp` returns a `timestamp`.
-      .timestamp = to_unix_timestamp(parsed_timestamp)
-    } else {
-      # Conversion failed, in this case use the current time.
-      .timestamp = to_unix_timestamp(now())
-    }
-
-    # Convert back to timestamp for this tutorial.
-    .timestamp_str = from_unix_timestamp!(.timestamp)
-
-    event_data = .
-
-   . = {
-    "ObservedTimestamp" : format_timestamp!(.timestamp_str, format: "%Y-%m-%d %H:%M:%S"),
-    "SeverityNumber" :to_int!(.severity_number),
-    "SeverityText" : .severity_text,
-    "Body" : encode_json(.message),
-    "ScopeName" : .scope.name,
-    "ServiceName" : .resources.service.name,
-    "SpanId" : .span_id,
-    "TraceId" : .trace_id,
-    "SourceType" : .source_type,
-    "LogResources" : .resources,
-    "LogAttributes" : .attributes,
-    "Log" : encode_json(event_data)
-   }
-'''
+#[transforms.otel_logs]
+#type = "remap"
+#inputs = ["otel.logs"]
+#source = '''
+#    parsed_timestamp, err = parse_timestamp(.observed_timestamp, format: "%Y-%m-%dT%H:%M:%S.%fZ")
+#
+#    # Check if the conversion was successful. Note here that all errors must be handled, more on that later.
+#    if err == null {
+#       # Note that the `to_unix_timestamp` expects a `timestamp` argument.
+#       # The following will compile because `parse_timestamp` returns a `timestamp`.
+#      .timestamp = to_unix_timestamp(parsed_timestamp)
+#    } else {
+#      # Conversion failed, in this case use the current time.
+#      .timestamp = to_unix_timestamp(now())
+#    }
+#
+#    # Convert back to timestamp for this tutorial.
+#    .timestamp_str = from_unix_timestamp!(.timestamp)
+#
+#    event_data = .
+#
+#   . = {
+#    "ObservedTimestamp" : format_timestamp!(.timestamp_str, format: "%Y-%m-%d %H:%M:%S"),
+#    "SeverityNumber" :to_int!(.severity_number),
+#    "SeverityText" : .severity_text,
+#    "Body" : encode_json(.message),
+#    "ScopeName" : .scope.name,
+#    "ServiceName" : .resources.service.name,
+#    "SpanId" : .span_id,
+#    "TraceId" : .trace_id,
+#    "SourceType" : .source_type,
+#    "LogResources" : .resources,
+#    "LogAttributes" : .attributes,
+#    "Log" : encode_json(event_data)
+#   }
+#'''
 
 
 #[sinks.console_traces]
@@ -106,25 +106,25 @@ source = '''
 ##encoding  = "json"
 #skip_unknown_fields = true
 
-[sinks.clickhouse_otel_traces.request]
-rate_limit_duration_secs = 1
-rate_limit_num = 100
+#[sinks.clickhouse_otel_traces.request]
+#rate_limit_duration_secs = 1
+#rate_limit_num = 100
 
 
 # Data sinks
-[sinks.clickhouse_otel_logs]
-type = "clickhouse"
-inputs = ["otel_logs"]
-database = "otel"
-table = "otel_logs"
-endpoint = "http://clickhouse:8123"
-compression = "gzip"
-#encoding.codec = "json"  # Use JSON format for structured logs
-skip_unknown_fields = true
+#[sinks.clickhouse_otel_logs]
+#type = "clickhouse"
+#inputs = ["otel_logs"]
+#database = "otel"
+#table = "otel_logs"
+#endpoint = "http://clickhouse:8123"
+#compression = "gzip"
+##encoding.codec = "json"  # Use JSON format for structured logs
+#skip_unknown_fields = true
 
 # Health checks
-[sinks.clickhouse_otel_logs.healthcheck]
-enabled = true
+#[sinks.clickhouse_otel_logs.healthcheck]
+#enabled = true
 
 ## Health checks
 #[sinks.clickhouse_otel_traces.healthcheck]

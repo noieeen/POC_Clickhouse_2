@@ -32,12 +32,12 @@ processors:
     detectors: [ "system" ]
     system:
       hostname_sources: [ "os" ]
-  
-  resource:
-    attributes:
-      - key: service.name
-        value: "OTEL Service"
-        action: upsert
+
+#  resource:
+#    attributes:
+#      - key: service.name
+#        value: "OTEL Service"
+#        action: upsert
 
 ### EXPORTER
 exporters:
@@ -97,28 +97,28 @@ service:
     
     traces/clickhouse:
       receivers: [ otlp ]
-      processors: [ memory_limiter/clickhouse, resourcedetection/system, resource, batch ]
+      processors: [ memory_limiter/clickhouse, resourcedetection/system,  batch ]
       exporters: [ clickhouse ]
     
     logs/clickhouse:
       receivers: [ otlp ]
-      processors: [ memory_limiter/clickhouse, resourcedetection/system, resource, batch ]
+      processors: [ memory_limiter/clickhouse, resourcedetection/system,  batch ]
       exporters: [ clickhouse ]
-    
-    #    traces:
-    #      receivers: [ otlp ]
-    #      #      processors: [ memory_limiter, batch ]
-    #      processors: [ memory_limiter/clickhouse, batch/clickhouse ]
-    #      exporters: [ clickhouse ]
-    
-    #    logs/clickhouse:
-    #      receivers: [ otlp ]
-    #      processors: [ memory_limiter/clickhouse, batch/clickhouse ]
-    #      exporters: [ clickhouse ]
-    
-    
-#    logs/vector:
-#      receivers: [ otlp ]
-#      processors: [ memory_limiter, batch ]
-#      exporters: [ otlp/vector ]
+      
+      #    traces:
+      #      receivers: [ otlp ]
+      #      #      processors: [ memory_limiter, batch ]
+      #      processors: [ memory_limiter/clickhouse, batch/clickhouse ]
+      #      exporters: [ clickhouse ]
+      
+      #    logs/clickhouse:
+      #      receivers: [ otlp ]
+      #      processors: [ memory_limiter/clickhouse, batch/clickhouse ]
+      #      exporters: [ clickhouse ]
+      
+      
+      #    logs/vector:
+      #      receivers: [ otlp ]
+      #      processors: [ memory_limiter, batch ]
+      #      exporters: [ otlp/vector ]
       
