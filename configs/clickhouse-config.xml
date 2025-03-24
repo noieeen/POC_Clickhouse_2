@@ -37,13 +37,25 @@
         <flush_interval_milliseconds>7500</flush_interval_milliseconds>
     </query_log>
 
+    <!--    <trace_log>-->
+    <!--        <database>system</database>-->
+    <!--        <table>trace_log</table>-->
+    <!--        <partition_by>toYYYYMM(event_date)</partition_by>-->
+    <!--        <flush_interval_milliseconds>7500</flush_interval_milliseconds>-->
+    <!--    </trace_log>-->
+
     <trace_log>
         <database>system</database>
         <table>trace_log</table>
         <partition_by>toYYYYMM(event_date)</partition_by>
         <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <flush_on_crash>false</flush_on_crash>
+        <symbolize>false</symbolize>
     </trace_log>
-
+    
     <!-- Prometheus -->
     <prometheus>
         <port>9363</port>

@@ -39,13 +39,13 @@ max_connection_age_secs = 300
 type = "remap"
 inputs = ["otel.traces"]
 source = '''
-#trace_data = .
+trace_data = .
 #. = {
 #    "Body" : encode_json(trace_data),
 #    "LogAttributes" : .attributes,
 #    "LogResources" : .resources
 #}
-  .  = {"dropped_attributes_count": .dropped_attributes_count}
+  .  = {"message": encode_json(trace_data)}
 '''
 
 # Optional: Transformation to add labels or filter logs
@@ -87,34 +87,34 @@ source = '''
 '''
 
 
-#[sinks.console_traces]
-#type = "console"
-#inputs = ["otel_traces"]
-##inputs = ["otel_logs", "otel_traces"]
-#encoding.codec = "json"
-#target = "stdout" #[stderr, stdout]
+[sinks.console_traces]
+type = "console"
+inputs = ["otel_traces"]
+#inputs = ["otel_logs", "otel_traces"]
+encoding.codec = "json"
+target = "stdout" #[stderr, stdout]
 
 # Data sinks
-#[sinks.clickhouse_otel_traces]
-#type = "clickhouse"
-#inputs = ["otel_traces"]
-#database = "logs"
-#table = "dummy"
-#endpoint = "http://clickhouse:8123"
-##compression = "gzip"
-##encoding  = "json"
-#skip_unknown_fields = true
-#
-#[sinks.clickhouse_otel_traces.request]
-#rate_limit_duration_secs = 1
-#rate_limit_num = 100
+[sinks.clickhouse_otel_traces]
+type = "clickhouse"
+inputs = ["otel_traces"]
+database = "logs"
+table = "dummy"
+endpoint = "http://clickhouse:8123"
+compression = "gzip"
+#encoding  = "json"
+skip_unknown_fields = true
+
+[sinks.clickhouse_otel_traces.request]
+rate_limit_duration_secs = 1
+rate_limit_num = 100
 
 
 # Data sinks
 [sinks.clickhouse_otel_logs]
 type = "clickhouse"
 inputs = ["otel_logs"]
-database = "default"
+database = "otel"
 table = "otel_logs"
 endpoint = "http://clickhouse:8123"
 compression = "gzip"

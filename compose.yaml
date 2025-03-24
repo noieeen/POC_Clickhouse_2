@@ -67,6 +67,8 @@ services:
       - prometheus
     networks:
       - monitoring-network
+      - redis-exporter
+  
   redis-exporter:
     image: bitnami/redis-exporter:latest
     ports:
@@ -81,10 +83,12 @@ services:
       - prometheus
     networks:
       - monitoring-network
+      - redis-exporter
   
   # SQL_Server
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
     hostname: mssql-db
     restart: always
     environment:
@@ -175,7 +179,7 @@ services:
   # Vector for log processing
   vector:
     image: timberio/vector:0.45.0-debian
-    command: [ "--config=/etc/vector/vector.toml","--verbose" ]
+    command: [ "--config=/etc/vector/vector.toml" ] #,"--verbose" 
     volumes:
       - ./configs/vector.toml:/etc/vector/vector.toml
     ports:
@@ -190,7 +194,8 @@ services:
   clickhouse:
     image: clickhouse/clickhouse-server:latest
     healthcheck:
-      test: [ "CMD-SHELL", "curl -s http://localhost:8123/ping | grep -q 'Ok.'" ]
+      #      test: [ "CMD-SHELL", "curl -s http://localhost:8123/ping | grep -q 'Ok.'" ]
+      test: [ "CMD", "nc", "-z", "localhost", "9000" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -233,6 +238,7 @@ services:
 
 networks:
   monitoring-network:
+    driver: bridge
   redis-exporter:
     driver: bridge
 
