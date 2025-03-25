@@ -19,6 +19,8 @@ builder.AddServiceDefaults(resourceBuilder);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
@@ -49,8 +51,11 @@ app.MapGet("/weatherforecast", () =>
             .ToArray();
         return forecast;
     })
-    .WithName("GetWeatherForecast")
-    .WithOpenApi();
+    .WithName("GetWeatherForecast");
+    // .WithOpenApi();
+
+
+app.MapDefaultEndpoints();
 
 app.Run();
 

@@ -57,7 +57,7 @@ public static class Extensions
 
         builder.Logging.AddOpenTelemetry(logging =>
         {
-            logging.AddConsoleExporter();
+            if (builder.Environment.IsDevelopment()) logging.AddConsoleExporter();
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
         });
@@ -65,7 +65,7 @@ public static class Extensions
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
             {
-                metrics.AddConsoleExporter();
+                // metrics.AddConsoleExporter();
                 metrics.AddAspNetCoreInstrumentation()
                     .AddPrometheusExporter()
                     .AddProcessInstrumentation()
@@ -83,7 +83,7 @@ public static class Extensions
         builder.Services.AddOpenTelemetry()
             .WithTracing(tracing =>
             {
-                tracing.AddConsoleExporter();
+                // tracing.AddConsoleExporter();
                 tracing.AddAspNetCoreInstrumentation()
                     .AddJaegerExporter()
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
