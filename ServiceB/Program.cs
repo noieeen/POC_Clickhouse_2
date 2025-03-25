@@ -17,7 +17,6 @@ var resourceBuilder = ResourceBuilder.CreateDefault()
 
 // From Core
 builder.AddServiceDefaults(resourceBuilder);
-// builder.AddServiceDefaults();
 
 
 // Add services to the container.

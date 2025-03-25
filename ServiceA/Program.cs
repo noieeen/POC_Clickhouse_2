@@ -1,16 +1,8 @@
-using System;
 using System.Diagnostics;
 using System.Reflection;
-using System.Threading.Tasks;
 using AuthService.Services;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
+using Core;
 using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 // Define service name and version for telemetry
@@ -19,56 +11,10 @@ var serviceVersion = "1.0.0";
 
 // Configure resource for OpenTelemetry
 var resourceBuilder = ResourceBuilder.CreateDefault()
-    .AddService(serviceName: serviceName, serviceVersion: serviceVersion);
+    .AddService(serviceName, serviceVersion: serviceVersion);
 
-// Add OpenTelemetry tracing
-builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
-{
-    tracerProviderBuilder
-        .SetResourceBuilder(resourceBuilder)
-        .AddJaegerExporter()
-        .AddGrpcClientInstrumentation()
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddSqlClientInstrumentation()
-        .AddConsoleExporter() // Export logs to the console
-        .AddOtlpExporter(x =>
-        {
-            x.Endpoint = new Uri("http://otel-collector:4317");
-            x.Protocol = OtlpExportProtocol.Grpc;
-        });
-});
-
-// Add OpenTelemetry metrics
-builder.Services.AddOpenTelemetry().WithMetrics(meterProviderBuilder =>
-{
-    meterProviderBuilder
-        .SetResourceBuilder(resourceBuilder)
-        .AddPrometheusExporter()
-        // Metrics provides by ASP.NET Core in .NET 8
-        .AddMeter("Microsoft.AspNetCore.Hosting")
-        .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
-        .AddProcessInstrumentation()
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddRuntimeInstrumentation()
-        .AddOtlpExporter(x => x.Endpoint = new Uri("http://otel-collector:4317"));
-});
-
-builder.Logging.ClearProviders();
-
-// Configure logging
-builder.Logging.AddOpenTelemetry(options =>
-{
-    options.SetResourceBuilder(resourceBuilder);
-    // options.AddConsoleExporter(); // Export logs to the console
-    options.AddOtlpExporter(x =>
-    {
-        x.Endpoint = new Uri("http://otel-collector:4317");
-        x.Protocol = OtlpExportProtocol.Grpc;
-        // options.Headers = "";
-    });
-});
+// From Core
+builder.AddServiceDefaults(resourceBuilder);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -94,8 +40,8 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    "default",
+    "{controller=Home}/{action=Index}/{id?}");
 
 // Sample endpoint that generates telemetry
 app.MapGet("/sample", async (ILogger<Program> logger) =>
