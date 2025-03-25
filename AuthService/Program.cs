@@ -1,4 +1,18 @@
+using System.Reflection;
+using Core;
+using OpenTelemetry.Resources;
+
 var builder = WebApplication.CreateBuilder(args);
+
+var serviceName = Assembly.GetCallingAssembly().GetName().Name ?? "Service";
+var serviceVersion = "1.0.0";
+
+// Configure resource for OpenTelemetry
+var resourceBuilder = ResourceBuilder.CreateDefault()
+    .AddService(serviceName: serviceName, serviceVersion: serviceVersion);
+
+// From Core
+builder.AddServiceDefaults(resourceBuilder);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -6,6 +20,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -4,7 +4,7 @@ global:
 
 scrape_configs:
   ### >OPENTELEMETRY
-  - job_name: 'otel-collector'
+  - job_name: 'Opentelemetry-collector'
     scrape_interval: 5s
     static_configs:
       - targets: [ 'otel-collector:8889' ]
@@ -12,7 +12,7 @@ scrape_configs:
           group: 'monitoring'
   
   ### >PROMETHEUS
-  - job_name: 'prometheus'
+  - job_name: 'Prometheus'
     scrape_interval: 5s
     static_configs:
       - targets: [ 'localhost:9090' ]
@@ -20,7 +20,7 @@ scrape_configs:
           group: 'monitoring'
   
   ### >CLICKHOUSE
-  - job_name: 'clickhouse'
+  - job_name: 'Clickhouse'
     scrape_interval: 5s
     static_configs:
       - targets: [ 'clickhouse:9363' ]
@@ -28,7 +28,7 @@ scrape_configs:
           group: 'monitoring'
   
   ### >VECTOR
-  - job_name: 'vector'
+  - job_name: 'Vector'
     scrape_interval: 5s
     static_configs:
       - targets: [ 'vector:9598' ]
@@ -36,34 +36,21 @@ scrape_configs:
           group: 'monitoring'
   
   ### >NET SERVICES
-  - job_name: 'services_a'
+  - job_name: 'Services'
     scrape_interval: 5s
     static_configs:
-      - targets: [ 'service_a:8080' ]
+      - targets: [ 'service_a:8080','service_b:8080','service_auth:8080' ]
         labels:
-          group: 'service'
+          group: 'services'
 
-  - job_name: 'services_b'
-    scrape_interval: 5s
-    static_configs:
-      - targets: [ 'service_a:8081' ]
-        labels:
-          group: 'service'
-
-  - job_name: 'services_auth'
-    scrape_interval: 5s
-    static_configs:
-      - targets: [ 'service_a:8082' ]
-        labels:
-          group: 'service'
   
   ### >MSSQL
-#  - job_name: 'mssql-exporter'
-#    scrape_interval: 5s
-#    static_configs:
-#      - targets: [ 'mssql-exporter:4000' ]
-#        labels:
-#          group: 'infra'
+  #  - job_name: 'mssql-exporter'
+  #    scrape_interval: 5s
+  #    static_configs:
+  #      - targets: [ 'mssql-exporter:4000' ]
+  #        labels:
+  #          group: 'infra'
   
   ### >REDIS
   - job_name: 'redis-exporter'

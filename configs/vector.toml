@@ -88,12 +88,19 @@ max_connection_age_secs = 300
 #'''
 
 
-#[sinks.console_traces]
-#type = "console"
-#inputs = ["otel_traces"]
-##inputs = ["otel_logs", "otel_traces"]
-#encoding.codec = "json"
-#target = "stdout" #[stderr, stdout]
+[transforms.otel_logs]
+type = "remap"
+inputs = ["otel.logs"]
+source = '''
+    .
+'''
+
+[sinks.console_logs]
+type = "console"
+inputs = ["otel_logs"]
+#inputs = ["otel_logs", "otel_traces"]
+encoding.codec = "json"
+target = "stdout" #[stderr, stdout]
 
 ## Data sinks
 #[sinks.clickhouse_otel_traces]

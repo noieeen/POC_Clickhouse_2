@@ -18,8 +18,21 @@ namespace Core;
 // To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
 public static class Extensions
 {
-    public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder,
+        ResourceBuilder resourceBuilder)
     {
+        var otelConnectionString = builder.Configuration.GetConnectionString("OTLP_ENDPOINT_URL") ??
+                                   throw new ArgumentNullException(
+                                       "builder.Configuration.GetConnectionString(\"OTLP_ENDPOINT_URL\")");
+
+        if (!string.IsNullOrWhiteSpace(otelConnectionString))
+        {
+            builder.Services.AddOpenTelemetry().WithMetrics(options => options.SetResourceBuilder(resourceBuilder));
+            builder.Services.AddOpenTelemetry().WithTracing(options => options.SetResourceBuilder(resourceBuilder));
+            builder.Logging.AddOpenTelemetry(options => options.SetResourceBuilder(resourceBuilder));
+        }
+
+
         builder.ConfigureOpenTelemetry();
 
         builder.AddDefaultHealthChecks();
@@ -40,8 +53,11 @@ public static class Extensions
 
     public static IHostApplicationBuilder ConfigureOpenTelemetry(this IHostApplicationBuilder builder)
     {
+        builder.Logging.ClearProviders();
+
         builder.Logging.AddOpenTelemetry(logging =>
         {
+            logging.AddConsoleExporter();
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
         });
@@ -49,8 +65,11 @@ public static class Extensions
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
             {
+                metrics.AddConsoleExporter();
                 metrics.AddAspNetCoreInstrumentation()
                     .AddPrometheusExporter()
+                    .AddProcessInstrumentation()
+                    .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
                     // Metrics provides by ASP.NET Core in .NET 8
@@ -59,13 +78,18 @@ public static class Extensions
                     // Metrics provided by System.Net libraries
                     .AddMeter("System.Net.Http")
                     .AddMeter("System.Net.NameResolution");
-            })
+            });
+
+        builder.Services.AddOpenTelemetry()
             .WithTracing(tracing =>
             {
+                tracing.AddConsoleExporter();
                 tracing.AddAspNetCoreInstrumentation()
+                    .AddJaegerExporter()
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     .AddGrpcClientInstrumentation()
-                    .AddHttpClientInstrumentation();
+                    .AddHttpClientInstrumentation()
+                    .AddSqlClientInstrumentation();
             });
 
         builder.AddOpenTelemetryExporters();
@@ -73,23 +97,6 @@ public static class Extensions
         return builder;
     }
 
-    public static IHostApplicationBuilder AddOpenTelemetryResource(this IHostApplicationBuilder builder,
-        ResourceBuilder resourceBuilder)
-    {
-        var otelConnectionString = builder.Configuration.GetConnectionString("OTLP_ENDPOINT_URL") ??
-                                   throw new ArgumentNullException(
-                                       "builder.Configuration.GetConnectionString(\"OTLP_ENDPOINT_URL\")");
-
-        if (string.IsNullOrWhiteSpace((otelConnectionString)))
-        {
-            builder.Services.AddOpenTelemetry().UseOtlpExporter();
-            builder.Services.AddOpenTelemetry().WithMetrics(options => options.SetResourceBuilder(resourceBuilder));
-            builder.Services.AddOpenTelemetry().WithTracing(options => options.SetResourceBuilder(resourceBuilder));
-            builder.Services.AddOpenTelemetry().WithLogging(options => options.SetResourceBuilder(resourceBuilder));
-        }
-
-        return builder;
-    }
 
     private static IHostApplicationBuilder AddOpenTelemetryExporters(this IHostApplicationBuilder builder)
     {
@@ -97,9 +104,10 @@ public static class Extensions
                                    throw new ArgumentNullException(
                                        "builder.Configuration.GetConnectionString(\"OTLP_ENDPOINT_URL\")");
 
-        if (string.IsNullOrWhiteSpace((otelConnectionString)))
+        if (!string.IsNullOrWhiteSpace(otelConnectionString))
         {
-            builder.Services.AddOpenTelemetry().UseOtlpExporter();
+            // builder.Services.AddOpenTelemetry().UseOtlpExporter();
+
             builder.Services.AddOpenTelemetry().WithMetrics(options => options.AddOtlpExporter(x =>
             {
                 x.Endpoint = new Uri(otelConnectionString);
@@ -112,11 +120,17 @@ public static class Extensions
                 x.Protocol = OtlpExportProtocol.Grpc;
             }));
 
-            builder.Services.AddOpenTelemetry().WithLogging(options => options.AddOtlpExporter(x =>
+            builder.Logging.AddOpenTelemetry(options => options.AddOtlpExporter(x =>
             {
                 x.Endpoint = new Uri(otelConnectionString);
                 x.Protocol = OtlpExportProtocol.Grpc;
             }));
+
+            // builder.Services.AddOpenTelemetry().WithLogging(options => options.AddOtlpExporter(x =>
+            // {
+            //     x.Endpoint = new Uri(otelConnectionString);
+            //     // x.Protocol = OtlpExportProtocol.Grpc;
+            // }));
         }
 
         return builder;

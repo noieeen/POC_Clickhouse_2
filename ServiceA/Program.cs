@@ -106,12 +106,12 @@ app.MapGet("/sample", async (ILogger<Program> logger) =>
     activity?.SetTag("sample.importance", "high");
 
     // Log something
-    logger.LogInformation("Sample endpoint called at {Time}", DateTime.UtcNow);
+    logger.LogInformation("A Sample endpoint called at {Time}", DateTime.UtcNow);
 
     // Simulate some work
     await Task.Delay(new Random().Next(10, 100));
 
-    return "Hello from monitored .NET app!";
+    return "Hello from monitored .NET app! from A";
 });
 
 app.MapGet("/login", async (ILogger<Program> logger) =>

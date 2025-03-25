@@ -115,10 +115,10 @@ service:
       #      receivers: [ otlp ]
       #      processors: [ memory_limiter/clickhouse, batch/clickhouse ]
       #      exporters: [ clickhouse ]
-      
-      
-      #    logs/vector:
-      #      receivers: [ otlp ]
-      #      processors: [ memory_limiter, batch ]
-      #      exporters: [ otlp/vector ]
+    
+    
+    logs/vector:
+      receivers: [ otlp ]
+      processors: [ memory_limiter, batch ]
+      exporters: [ otlp/vector ]
       
