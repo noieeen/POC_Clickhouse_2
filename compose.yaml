@@ -31,7 +31,7 @@ services:
     networks:
       - monitoring-network
 
-  # Service Auth: 2nd application
+  # Service Auth
   service_auth:
     image: noieeen/serviceauth
     build:
@@ -41,6 +41,19 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - "8083:8080"
+    depends_on:
+      - otel-collector
+    networks:
+      - monitoring-network
+    
+    # API
+  api-auth:
+    image: noieeen/auth.api
+    build:
+      context: .
+      dockerfile: Auth.Api/Dockerfile
+    ports:
+      - "9001:8080"
     depends_on:
       - otel-collector
     networks:
@@ -150,7 +163,7 @@ services:
     networks:
       - monitoring-network
     depends_on:
-#      - clickhouse
+      #      - clickhouse
       clickhouse:
         condition: service_healthy
 
@@ -201,10 +214,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-#      test: curl 'http://localhost:8123/ping'
-#      test: [ "CMD-SHELL", "curl -s http://localhost:8123/ping | grep -q 'Ok.'" ]
+      #      test: curl 'http://localhost:8123/ping'
+      #      test: [ "CMD-SHELL", "curl -s http://localhost:8123/ping | grep -q 'Ok.'" ]
       #      test: [ "CMD", "nc", "-z", "localhost", "9000" ]
-#      interval: 5s
+    #      interval: 5s
     #      timeout: 5s
     #      retries: 5
     volumes:
@@ -254,4 +267,6 @@ volumes:
   prometheus-data:
   clickhouse-data:
   grafana-data:
+
+
 

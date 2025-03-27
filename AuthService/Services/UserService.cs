@@ -1,7 +1,5 @@
 using AuthService.Models;
-using Database.Data;
-using Database.Models;
-using Database.Repositories;
+using Database.Models.DBModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthService.Services;
@@ -15,28 +13,39 @@ public class UserService : IUserService
         _context = context;
     }
 
-    public async Task<User> RegisterUserAsync(string name, string email)
+    public async Task<User> RegisterUserAsync(RegisterRequest req)
     {
         // Check if user exists
-        if (await _context.Users.AnyAsync(u => u.Email == email))
+        if (await _context.Users.AnyAsync(u => u.Email == req.Email))
         {
             throw new Exception("User already exists.");
         }
 
         // Create user
-        var user = new User { Name = name, Email = email };
+        var user = new User { Name = req.Username, Email = req.Email, Password = req.Password };
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
         return user;
     }
-    public async Task<bool> Login(string username, string password)
+
+    public async Task<bool> Login(LoginRequest req)
     {
-        return await Task.FromResult(true);
+        if (await _context.Users.AnyAsync(u => u.Email == req.Email && u.Password == req.Password))
+        {
+            return true;
+        }
+
+        return false;
     }
 
-    public async Task<bool> Logout(string username)
+    public async Task<bool> Logout(LogoutReq req)
     {
-        return await Task.FromResult(true);
+        if (await _context.Users.AnyAsync(u => u.Email == req.Email))
+        {
+            return true;
+        }
+
+        return false;
     }
 }

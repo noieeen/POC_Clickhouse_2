@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Database.Models;
+namespace Database.Models.DBModel;
 
 public partial class Order
 {

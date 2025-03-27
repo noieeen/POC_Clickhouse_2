@@ -1,1 +1,10 @@
-dotnet ef dbcontext scaffold "Server=localhost;Database=Mock_Monitoring_Db;User Id=sa;Password=MyPass@word90_;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer --output-dir Models --context AppDbContext --force
+-- Important
+-> [-p] = project name
+-> [--output-dir]
+-> [--context]
+
+
+dotnet ef dbcontext scaffold "Server=localhost;Database=Mock_Monitoring_Db;User Id=sa;Password=MyPass@word90_;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer --output-dir Models/DBModel --context AppDbContext --force
+
+[cdp -sample]
+dotnet ef dbcontext scaffold "Data Source=HOST_XXX;Initial Catalog=TABLE_XXX;Persist Security Info=true;User ID=USERNAME_XXX;Password=PASSWORD_XXX;" Microsoft.EntityFrameworkCore.SqlServer -p CDP.Core --output-dir Models/DBModel/CDP_MKA --context CDP_MKA_Entities --use-database-names -t MKA_Segment_Tracking -t MKA_Node_Result -t MKA_Node_Segment -t MKA_Flow --force --no-onconfiguring
