@@ -1,4 +1,5 @@
 using AuthService.Models;
+using AuthService.Services;
 using Core;
 using Microsoft.AspNetCore.Mvc;
 using Core.Api.Controller;
@@ -10,6 +11,7 @@ namespace Auth.Api.Controllers
     [ApiController]
     public class AuthController : BaseApiController
     {
+        private readonly IUserService _userService;
         // public AuthController(
         //     ILogger<AuthController> logger,
         //     ICommon_Exception_Factory common_Ex_Factory,
@@ -31,11 +33,14 @@ namespace Auth.Api.Controllers
         // }
 
         public AuthController(
-            ILogger<AuthController> logger, 
+            ILogger<AuthController> logger,
             ICommon_Exception_Factory commonExFactory,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IUserService userService
+        )
             : base(logger, commonExFactory, httpContextAccessor)
         {
+            _userService = userService;
         }
 
         [HttpPost]
@@ -43,15 +48,37 @@ namespace Auth.Api.Controllers
         {
             try
             {
+                var result = await _userService.Login(req);
                 Data = new
                 {
-                    username = req.Email
+                    result
                 };
                 // Status = "200";
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e, e.Message);
+                ApiException = e;
+            }
+
+            // Data ={}
+            return Build_JsonResp();
+        }
+        [HttpPost]
+        public async Task<IActionResult> RegisterAsync(RegisterRequest req)
+        {
+            try
+            {
+                var result = await _userService.RegisterUserAsync(req);
+                Data = new
+                {
+                    result
+                };
+                // Status = "200";
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, e.Message);
                 ApiException = e;
             }
 

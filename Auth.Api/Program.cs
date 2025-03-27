@@ -1,6 +1,9 @@
 using System.Reflection;
+using AuthService.Services;
 using Core;
 using Core.Factory;
+using Database.Models.DBModel;
+using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +24,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Register services
+// Database connection
+var connectionString = builder.Configuration.GetConnectionString("AUTH_DB_CONNECTION_STRING");
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddScoped<IUserService, UserService>(); // Register the correct implementation
+
 builder.Services.AddSingleton<ICommon_Exception_Factory, Common_Exception_Factory>(); // Register the correct implementation
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); // Register the correct implementation
 
