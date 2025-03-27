@@ -9,6 +9,6 @@ public class ConnectionStringProvider
 
     public string SQLServerConnectionString()
     {
-        return "Server=localhost;Database=Mock_Monitoring_DB;User Id=sa;Password=MyPass@word90_;TrustServerCertificate=True;";
+        return "Server=mssql;Database=Mock_Monitoring_DB;User Id=sa;Password=MyPass@word90_;Encrypt=False;";
     }
 }

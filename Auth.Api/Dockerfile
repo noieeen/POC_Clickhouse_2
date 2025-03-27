@@ -1,10 +1,20 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+
+# Install ICU (for Globalization support)
+RUN apk add --no-cache icu-libs
+RUN apt-get update && \
+    apt-get install -y libicu-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set environment variable
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Auth.Api/Auth.Api.csproj", "Auth.Api/"]

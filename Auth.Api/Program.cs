@@ -6,6 +6,17 @@ using Database.Models.DBModel;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Resources;
 
+// using System.Globalization;
+// using System.Runtime.InteropServices;
+//
+// if (GlobalizationMode.Invariant)
+// {
+//     throw new Exception("Invariant mode is still enabled! ICU is not recognized.");
+// }
+//
+// CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
+// CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
+
 var builder = WebApplication.CreateBuilder(args);
 
 var serviceName = Assembly.GetCallingAssembly().GetName().Name ?? "Service";
@@ -29,7 +40,8 @@ var connectionString = builder.Configuration.GetConnectionString("AUTH_DB_CONNEC
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddScoped<IUserService, UserService>(); // Register the correct implementation
 
-builder.Services.AddSingleton<ICommon_Exception_Factory, Common_Exception_Factory>(); // Register the correct implementation
+builder.Services
+    .AddSingleton<ICommon_Exception_Factory, Common_Exception_Factory>(); // Register the correct implementation
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); // Register the correct implementation
 
 builder.Services.AddControllers();

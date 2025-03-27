@@ -32,13 +32,14 @@ services:
       - monitoring-network
 
   # Service Auth
-  service_auth:
+  service_auth: # connect mssql
     image: noieeen/serviceauth
     build:
       context: .
       dockerfile: AuthService/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
     ports:
       - "8083:8080"
     depends_on:
@@ -47,11 +48,14 @@ services:
       - monitoring-network
     
     # API
-  api-auth:
+  api_auth:
     image: noieeen/auth.api
     build:
       context: .
       dockerfile: Auth.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
     ports:
       - "9001:8080"
     depends_on:
@@ -102,7 +106,8 @@ services:
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
     platform: linux/amd64
-    hostname: mssql-db
+    container_name: sql_server
+    hostname: mssql_db
     restart: always
     environment:
       MSSQL_SA_PASSWORD: "MyPass@word90_"

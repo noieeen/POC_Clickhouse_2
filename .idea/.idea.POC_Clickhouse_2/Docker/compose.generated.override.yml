@@ -1,6 +1,24 @@
 # This is a generated file. Not intended for manual editing.
 version: "3.8"
 services:
+  api_auth:
+    build:
+      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2"
+      dockerfile: "Auth.Api/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/Auth.Api.dll"
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "noieeen/auth.api:dev"
+    ports: []
+    volumes:
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Auth.Api:/app:rw"
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2:/src:rw"
+    - "/Users/tharinchemchan/.nuget/packages:/home/app/.nuget/packages"
+    working_dir: "/app"
   service_a:
     build:
       context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2"

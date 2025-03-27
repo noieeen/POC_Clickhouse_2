@@ -74,7 +74,7 @@ app.MapGet("/weatherforecast", () =>
     .WithName("GetWeatherForecast")
     .WithOpenApi();
 
-app.MapPost("/register", async (RegisterRequest req) =>
+app.MapPost("/register-service", async (RegisterRequest req) =>
     {
         var context = new AppDbContext();
         var userService = new UserService(context);
@@ -82,6 +82,22 @@ app.MapPost("/register", async (RegisterRequest req) =>
         return result;
     })
     .WithName("Register User")
+    .WithOpenApi();
+
+app.MapPost("/mock-register-service", async () =>
+    {
+        var context = new AppDbContext();
+        var userService = new UserService(context);
+        var req = new RegisterRequest
+        {
+            Username = $"AA{Guid.NewGuid():N}",
+            Password = "AAAAA"
+        };
+        req.Email = $"{req.Username}@mail.com";
+        var result = await userService.RegisterUserAsync(req);
+        return result;
+    })
+    .WithName("Mock Register User")
     .WithOpenApi();
 
 
