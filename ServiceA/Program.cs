@@ -71,8 +71,8 @@ app.MapGet("/login", async (ILogger<Program> logger) =>
 
     activity?.SetTag("auth.importance", "high");
 
-    var auth = new Auth();
-    var success = await auth.Login("username", "password");
+    // var auth = new UserService();
+    var success = true; //await auth.Login("username", "password");
 
     // Log something
     logger.LogInformation("Login Resp :{Result}", success ? "Success" : "Fail");

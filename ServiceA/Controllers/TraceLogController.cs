@@ -40,8 +40,41 @@ public class TraceLogController : ControllerBase
     }
 
     [HttpGet]
-    // [Route("api/trace-http-callback-2")]
-    public Dictionary<string, string> TraceHttpCallbackk()
+    public Dictionary<string, string> TracesInfo()
+    {
+        var result = new Dictionary<string, string>();
+        var activity = new Activity("ActivityInsideHttpRequest");
+        activity.Start();
+        result["TraceId"] = activity.Context.TraceId.ToString();
+        result["ParentSpanId"] = activity.ParentSpanId.ToString();
+        if (activity.Context.TraceState != null)
+        {
+            result["TraceState"] = activity.Context.TraceState;
+        }
+
+        activity.Stop();
+        return result;
+    }
+    
+    [HttpGet]
+    public Dictionary<string, string> TracesRedis()
+    {
+        var result = new Dictionary<string, string>();
+        var activity = new Activity("ActivityInsideHttpRequest");
+        activity.Start();
+        result["TraceId"] = activity.Context.TraceId.ToString();
+        result["ParentSpanId"] = activity.ParentSpanId.ToString();
+        if (activity.Context.TraceState != null)
+        {
+            result["TraceState"] = activity.Context.TraceState;
+        }
+
+        activity.Stop();
+        return result;
+    }
+    
+    [HttpGet]
+    public Dictionary<string, string> TracesQuerySQL()
     {
         var result = new Dictionary<string, string>();
         var activity = new Activity("ActivityInsideHttpRequest");

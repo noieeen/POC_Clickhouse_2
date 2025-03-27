@@ -1,0 +1,1 @@
+dotnet ef dbcontext scaffold "Server=localhost;Database=Mock_Monitoring_Db;User Id=sa;Password=MyPass@word90_;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer --output-dir Models --context AppDbContext --force
