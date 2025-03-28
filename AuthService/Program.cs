@@ -26,7 +26,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 // Database connection
-var connectionString = builder.Configuration.GetConnectionString("AUTH_DB_CONNECTION_STRING");
+var connectionString = builder.Configuration.GetConnectionString("ConnectionStrings__DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 // Register services

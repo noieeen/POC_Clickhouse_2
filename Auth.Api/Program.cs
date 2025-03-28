@@ -36,7 +36,7 @@ builder.Services.AddSwaggerGen();
 
 // Register services
 // Database connection
-var connectionString = builder.Configuration.GetConnectionString("AUTH_DB_CONNECTION_STRING");
+var connectionString = builder.Configuration.GetConnectionString("ConnectionStrings__DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddScoped<IUserService, UserService>(); // Register the correct implementation
 
