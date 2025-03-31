@@ -1,5 +1,6 @@
 ﻿version: '3.8'
-
+include:
+  - mssql-compose.yaml
 services:
   # Service A: Main application
   service_a:
