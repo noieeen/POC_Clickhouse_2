@@ -11,8 +11,7 @@ ENV LC_ALL en_US.UTF-8
 #    apt-get install -y libicu-dev && \
 #    rm -rf /var/lib/apt/lists/* \
 #    
-## Set environment variable
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+
 
 USER $APP_UID
 WORKDIR /app
@@ -35,4 +34,7 @@ RUN dotnet publish "AuthService.csproj" -c $BUILD_CONFIGURATION -o /app/publish 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+## Set environment variable
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 ENTRYPOINT ["dotnet", "AuthService.dll"]
