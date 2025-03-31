@@ -2,18 +2,18 @@ version: '3.8'
 
 services:
   # SQL_Server
-  database.server:
+  database-server:
     image: mcr.microsoft.com/mssql/server:2022-latest
     platform: linux/amd64
-    container_name: database.server
-    hostname: mssql_db
+#    container_name: database-server
+#    hostname: mssql_db
     restart: always
     environment:
       MSSQL_SA_PASSWORD: "MyPass@word90_"
       ACCEPT_EULA: "Y"
       MSSQL_DATA_DIR: /var/opt/mssql/data
       MSSQL_PID: 'Developer'
-      MSSQL_TCP_PORT: 1433
+#      MSSQL_TCP_PORT: 1433
 #      LC_ALL: "en_US.UTF-8"
 #      LANG: "en_US.UTF-8"
     ports:
@@ -33,5 +33,6 @@ services:
       - ./data/mssql-data:/var/opt/mssql/data
       - ./log:/var/opt/mssql/log
       - ./secrets:/var/opt/mssql/secrets
+#      - ./libs:/opt/mssql/lib/
   #    networks:
   #      - monitoring-network
