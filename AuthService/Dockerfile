@@ -2,12 +2,12 @@
 
 # Install ICU (for Globalization support)
 RUN apk add --no-cache icu-libs
-RUN apt-get update && \
-    apt-get install -y libicu-dev && \
-    rm -rf /var/lib/apt/lists/* \
-    
-# Set environment variable
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+#RUN apt-get update && \
+#    apt-get install -y libicu-dev && \
+#    rm -rf /var/lib/apt/lists/* \
+#    
+## Set environment variable
+#ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 USER $APP_UID
 WORKDIR /app

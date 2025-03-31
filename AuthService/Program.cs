@@ -26,11 +26,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 // Database connection
-var connectionString = builder.Configuration.GetConnectionString("ConnectionStrings__DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+var connectionString = builder.Configuration.GetConnectionString("DbConnectionString");
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(@connectionString));
 
 // Register services
-// builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Add controllers
 builder.Services.AddControllers();
@@ -46,8 +46,28 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-app.UseAuthorization();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        context.Database.EnsureCreated();
+        // DbInitializer.Initialize(context);
+    }
+
+    catch (Exception e)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(e, "An error occurred creating the DB.");
+    }
+}
+
+app.UseRouting();
+// app.UseHttpsRedirection(); //ERROR: Failed to determine the https port for redirect.
+app.UseAuthentication();
+app.UseAuthorization(); // Add it here
 
 app.MapControllerRoute(
     "default",
@@ -77,6 +97,7 @@ app.MapGet("/weatherforecast", () =>
 app.MapPost("/register-service", async (RegisterRequest req) =>
     {
         var context = new AppDbContext();
+        Console.WriteLine("AppDbContext", context);
         var userService = new UserService(context);
         var result = await userService.RegisterUserAsync(req);
         return result;

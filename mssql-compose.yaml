@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # SQL_Server
+  database.server:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    container_name: database.server
+    hostname: mssql_db
+    restart: always
+    environment:
+      MSSQL_SA_PASSWORD: "MyPass@word90_"
+      ACCEPT_EULA: "Y"
+      MSSQL_DATA_DIR: /var/opt/mssql/data
+      MSSQL_PID: 'Developer'
+      MSSQL_TCP_PORT: 1433
+#      LC_ALL: "en_US.UTF-8"
+#      LANG: "en_US.UTF-8"
+    ports:
+      - "1433:1433"
+    healthcheck:
+      #      test: [ "CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "MyPass@word90_", "-Q", "SELECT 1" ]
+      #      timeout: 20s
+      #      retries: 10
+      #      start_period: 10s
+      #      test: [ "CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q \"SELECT 1\" || exit 1" ]
+      test: [ "CMD-SHELL","bash","./configs/script/healthcheck/mssql.sh", ]
+      #      CMD /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -Q "SELECT 1" || exit 1 ## TODO: TRY
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - ./data/mssql-data:/var/opt/mssql/data
+      - ./log:/var/opt/mssql/log
+      - ./secrets:/var/opt/mssql/secrets
+  #    networks:
+  #      - monitoring-network
