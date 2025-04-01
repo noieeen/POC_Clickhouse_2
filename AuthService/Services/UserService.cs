@@ -1,6 +1,7 @@
 using AuthService.Models;
 using Database.Models.DBModel;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Trace;
 
 namespace AuthService.Services;
 
@@ -15,6 +16,8 @@ public class UserService : IUserService
 
     public async Task<User> RegisterUserAsync(RegisterRequest req)
     {
+        var span = new SpanAttributes();
+        span.Add("db.system.name", "microsoft.sql_server");
         // Check if user exists
         if (await _context.Users.AnyAsync(u => u.Email == req.Email))
         {

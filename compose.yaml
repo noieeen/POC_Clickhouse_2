@@ -43,7 +43,6 @@ services:
       dockerfile: AuthService/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
     #      - ConnectionStrings__DefaultConnection=Server=localhost;Database=Mock_Monitoring_DB;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
     ports:
       - "8083:8080"
@@ -64,7 +63,6 @@ services:
       dockerfile: Auth.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
     #      - ConnectionStrings__DefaultConnection=Server=localhost;Database=Mock_Monitoring_DB;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
     ports:
       - "9001:8080"

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Core;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +52,7 @@ app.MapDefaultEndpoints();
 
 app.MapGet("/sample", async (ILogger<Program> logger) =>
 {
+
     var activitySource = new ActivitySource(serviceName);
     using var activity = activitySource.StartActivity("SampleOperation");
 
