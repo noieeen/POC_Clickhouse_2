@@ -3,6 +3,7 @@ using AuthService.Services;
 using Core;
 using Microsoft.AspNetCore.Mvc;
 using Core.Api.Controller;
+using Core.Constant;
 using Core.Utils;
 
 namespace Auth.Api.Controllers
@@ -53,7 +54,7 @@ namespace Auth.Api.Controllers
                 {
                     result
                 };
-                // Status = "200";
+                Status = CoreConstant.Api.Result_Status.Success;
             }
             catch (Exception e)
             {
@@ -74,7 +75,7 @@ namespace Auth.Api.Controllers
                 {
                     result
                 };
-                // Status = "200";
+                Status = CoreConstant.Api.Result_Status.Success;
             }
             catch (Exception e)
             {

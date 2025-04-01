@@ -22,18 +22,16 @@ builder.AddServiceDefaults(resourceBuilder);
 // // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+// Add controllers
 builder.Services.AddControllers();
 
 // Database connection
 var connectionString = builder.Configuration.GetConnectionString("DbConnectionString");
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(@connectionString));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 // Register services
 builder.Services.AddScoped<IUserService, UserService>();
 
-// Add controllers
-builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -64,7 +62,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.UseRouting();
+// app.UseRouting();
 // app.UseHttpsRedirection(); //ERROR: Failed to determine the https port for redirect.
 app.UseAuthentication();
 app.UseAuthorization(); // Add it here
@@ -94,27 +92,35 @@ app.MapGet("/weatherforecast", () =>
     .WithName("GetWeatherForecast")
     .WithOpenApi();
 
-app.MapPost("/register-service", async (RegisterRequest req) =>
+app.MapPost("/register-service", async (IServiceProvider scopeFactory, RegisterRequest req) =>
     {
-        var context = new AppDbContext();
-        Console.WriteLine("AppDbContext", context);
-        var userService = new UserService(context);
+        using var scope = scopeFactory.CreateScope();
+        var services = scope.ServiceProvider;
+
+        var context = services.GetRequiredService<AppDbContext>();
+        var userService = services.GetRequiredService<IUserService>();
+
         var result = await userService.RegisterUserAsync(req);
         return result;
     })
     .WithName("Register User")
     .WithOpenApi();
 
-app.MapPost("/mock-register-service", async () =>
+app.MapPost("/mock-register-service", async (IServiceProvider scopeFactory) =>
     {
-        var context = new AppDbContext();
-        var userService = new UserService(context);
+        using var scope = scopeFactory.CreateScope();
+        var services = scope.ServiceProvider;
+
+        var context = services.GetRequiredService<AppDbContext>();
+        var userService = services.GetRequiredService<IUserService>();
+
         var req = new RegisterRequest
         {
             Username = $"AA{Guid.NewGuid():N}",
-            Password = "AAAAA"
+            Password = "AAAAA",
+            Email = $"{Guid.NewGuid():N}@mail.com"
         };
-        req.Email = $"{req.Username}@mail.com";
+
         var result = await userService.RegisterUserAsync(req);
         return result;
     })
@@ -122,7 +128,7 @@ app.MapPost("/mock-register-service", async () =>
     .WithOpenApi();
 
 
-app.MapDefaultEndpoints(); // Health
+app.MapDefaultEndpoints(); // Health check Endpoint
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)

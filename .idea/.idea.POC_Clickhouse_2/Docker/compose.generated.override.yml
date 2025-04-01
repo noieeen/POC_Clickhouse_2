@@ -12,7 +12,7 @@ services:
     - "/app/bin/Debug/net8.0/Auth.Api.dll"
     environment:
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "noieeen/auth.api:dev"
+    image: "auth.api:dev"
     ports: []
     volumes:
     - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Auth.Api:/app:rw"
@@ -31,7 +31,7 @@ services:
     environment:
       ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net8.0/ServiceA.staticwebassets.runtime.CT.json"
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "noieeen/servicea:dev"
+    image: "servicea:dev"
     ports: []
     volumes:
     - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/ServiceA:/app:rw"
@@ -49,7 +49,7 @@ services:
     - "/app/bin/Debug/net8.0/AuthService.dll"
     environment:
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "noieeen/serviceauth:dev"
+    image: "serviceauth:dev"
     ports: []
     volumes:
     - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/AuthService:/app:rw"
@@ -68,7 +68,7 @@ services:
     environment:
       ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net8.0/ServiceB.staticwebassets.runtime.CT.json"
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "noieeen/serviceb:dev"
+    image: "serviceb:dev"
     ports: []
     volumes:
     - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/ServiceB:/app:rw"

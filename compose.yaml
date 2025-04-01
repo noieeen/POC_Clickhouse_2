@@ -4,7 +4,8 @@ include:
 services:
   # Service A: Main application
   service_a:
-    image: noieeen/servicea
+    image: servicea
+    platform: linux/amd64
     build:
       context: .
       dockerfile: ServiceA/Dockerfile
@@ -19,7 +20,8 @@ services:
   
   # Service B: 2nd application
   service_b:
-    image: noieeen/serviceb
+    image: serviceb
+    platform: linux/amd64
     build:
       context: .
       dockerfile: ServiceB/Dockerfile
@@ -34,7 +36,8 @@ services:
 
   # Service Auth
   service_auth: # connect mssql
-    image: noieeen/serviceauth
+    image: serviceauth
+    platform: linux/amd64
     build:
       context: .
       dockerfile: AuthService/Dockerfile
@@ -54,7 +57,8 @@ services:
     
     # API
   api_auth:
-    image: noieeen/auth.api
+    image: auth.api
+    platform: linux/amd64
     build:
       context: .
       dockerfile: Auth.Api/Dockerfile
