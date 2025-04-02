@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  k6:
+    image: grafana/k6:latest
+    container_name: k6-load-test
+    volumes:
+      - ./Tests/K6-script/mock_add_product.js:/script.js  # Mount the test script
+    command: [ "run", "/script.js" ]
+    networks:
+      - k6-network
+
+networks:
+  k6-network:
+    driver: bridge

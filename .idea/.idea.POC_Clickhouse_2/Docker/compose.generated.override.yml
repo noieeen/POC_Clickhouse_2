@@ -3,8 +3,8 @@ version: "3.8"
 services:
   api_auth:
     build:
-      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2"
-      dockerfile: "Auth.Api/Dockerfile"
+      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Composes"
+      dockerfile: "../Auth.Api/Dockerfile"
       target: "base"
     command: []
     entrypoint:
@@ -21,8 +21,8 @@ services:
     working_dir: "/app"
   api_store:
     build:
-      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2"
-      dockerfile: "Store.Api/Dockerfile"
+      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Composes"
+      dockerfile: "../Store.Api/Dockerfile"
       target: "base"
     command: []
     entrypoint:
@@ -30,7 +30,7 @@ services:
     - "/app/bin/Debug/net8.0/Store.Api.dll"
     environment:
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "store.api:dev"
+    image: "noieeen/store.api:dev"
     ports: []
     volumes:
     - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Store.Api:/app:rw"
@@ -39,8 +39,8 @@ services:
     working_dir: "/app"
   service_a:
     build:
-      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2"
-      dockerfile: "ServiceA/Dockerfile"
+      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Composes"
+      dockerfile: "../ServiceA/Dockerfile"
       target: "base"
     command: []
     entrypoint:
@@ -58,8 +58,8 @@ services:
     working_dir: "/app"
   service_auth:
     build:
-      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2"
-      dockerfile: "AuthService/Dockerfile"
+      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Composes"
+      dockerfile: "../AuthService/Dockerfile"
       target: "base"
     command: []
     entrypoint:
@@ -76,8 +76,8 @@ services:
     working_dir: "/app"
   service_b:
     build:
-      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2"
-      dockerfile: "ServiceB/Dockerfile"
+      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Composes"
+      dockerfile: "../ServiceB/Dockerfile"
       target: "base"
     command: []
     entrypoint:

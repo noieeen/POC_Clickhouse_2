@@ -30,9 +30,9 @@ services:
       timeout: 5s
       retries: 10
     volumes:
-      - ./data/mssql-data:/var/opt/mssql/data
-      - ./log:/var/opt/mssql/log
-      - ./secrets:/var/opt/mssql/secrets
+      - ../data/mssql-data:/var/opt/mssql/data
+      - ../log:/var/opt/mssql/log
+      - ../secrets:/var/opt/mssql/secrets
     #      - ./libs:/opt/mssql/lib/
     networks:
       - monitoring-network
