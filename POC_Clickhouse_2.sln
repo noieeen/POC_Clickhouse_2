@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "Database\Databa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth.Api", "Auth.Api\Auth.Api.csproj", "{0EB23F07-575F-43AD-AF09-A18BB88977B4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Api", "Store.Api\Store.Api.csproj", "{507263F4-8CF1-4E43-939F-120CF75CD544}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,11 @@ Global
 		{0EB23F07-575F-43AD-AF09-A18BB88977B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0EB23F07-575F-43AD-AF09-A18BB88977B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EB23F07-575F-43AD-AF09-A18BB88977B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{507263F4-8CF1-4E43-939F-120CF75CD544}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{507263F4-8CF1-4E43-939F-120CF75CD544}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{507263F4-8CF1-4E43-939F-120CF75CD544}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{507263F4-8CF1-4E43-939F-120CF75CD544}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 EndGlobal

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore.SqlServer.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
+using OpenTelemetry.Instrumentation.SqlClient;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -66,31 +68,35 @@ public static class Extensions
             .WithMetrics(metrics =>
             {
                 // metrics.AddConsoleExporter();
-                metrics.AddAspNetCoreInstrumentation()
+                metrics
+                    .AddAspNetCoreInstrumentation()
                     .AddPrometheusExporter()
                     .AddProcessInstrumentation()
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
                     // Metrics provides by ASP.NET Core in .NET 8
-                    .AddMeter("Microsoft.AspNetCore.Hosting")
-                    .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
+                    .AddMeter(["Microsoft.AspNetCore.Hosting"])
+                    .AddMeter(["Microsoft.AspNetCore.Server.Kestrel"])
                     // Metrics provided by System.Net libraries
-                    .AddMeter("System.Net.Http")
-                    .AddMeter("System.Net.NameResolution");
+                    .AddMeter(["System.Net.Http"])
+                    .AddMeter(["System.Net.NameResolution"]);
             });
 
         builder.Services.AddOpenTelemetry()
             .WithTracing(tracing =>
             {
                 // tracing.AddConsoleExporter();
-                tracing.AddAspNetCoreInstrumentation()
+                tracing
+                    .AddAspNetCoreInstrumentation()
                     .AddJaegerExporter()
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     .AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddSqlClientInstrumentation()
                     .AddEntityFrameworkCoreInstrumentation();
+
+                // tracing.AddSource(SqlClientTraceInstrumentationOptions);
             });
 
         builder.AddOpenTelemetryExporters();

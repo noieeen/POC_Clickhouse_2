@@ -42,7 +42,8 @@ scrape_configs:
       - targets: [ 'service_a:8080',
                    'service_b:8080',
                    'service_auth:8080',
-                   'api_auth:8080' ]
+                   'api_auth:8080',
+                   'api_store:8080' ]
         labels:
           group: 'services'
   

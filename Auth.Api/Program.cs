@@ -5,6 +5,7 @@ using Core.Factory;
 using Database.Models.DBModel;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 // using System.Globalization;
 // using System.Runtime.InteropServices;
@@ -24,7 +25,11 @@ var serviceVersion = "1.0.0";
 
 // Configure resource for OpenTelemetry
 var resourceBuilder = ResourceBuilder.CreateDefault()
-    .AddService(serviceName: serviceName, serviceVersion: serviceVersion);
+    .AddService(serviceName: serviceName, serviceVersion: serviceVersion)
+    .AddAttributes(new Dictionary<string, object>
+    {
+        ["module.name"] = "Auth Api"
+    });
 
 // From Core
 builder.AddServiceDefaults(resourceBuilder);
@@ -37,6 +42,7 @@ builder.Services.AddSwaggerGen();
 // Register services
 // Database connection
 var connectionString = builder.Configuration.GetConnectionString("DbConnectionString");
+
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<IUserService, UserService>(); // Register the correct implementation

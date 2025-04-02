@@ -13,7 +13,11 @@ var serviceVersion = "1.0.0";
 
 // Configure resource for OpenTelemetry
 var resourceBuilder = ResourceBuilder.CreateDefault()
-    .AddService(serviceName: serviceName, serviceVersion: serviceVersion);
+    .AddService(serviceName: serviceName, serviceVersion: serviceVersion)
+    .AddAttributes(new Dictionary<string, object>
+    {
+        ["module.name"] = "Auth Service"
+    });
 
 // From Core
 builder.AddServiceDefaults(resourceBuilder);

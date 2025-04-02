@@ -12,10 +12,28 @@ services:
     - "/app/bin/Debug/net8.0/Auth.Api.dll"
     environment:
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "auth.api:dev"
+    image: "noieeen/auth.api:dev"
     ports: []
     volumes:
     - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Auth.Api:/app:rw"
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2:/src:rw"
+    - "/Users/tharinchemchan/.nuget/packages:/home/app/.nuget/packages"
+    working_dir: "/app"
+  api_store:
+    build:
+      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2"
+      dockerfile: "Store.Api/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/Store.Api.dll"
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "store.api:dev"
+    ports: []
+    volumes:
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Store.Api:/app:rw"
     - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2:/src:rw"
     - "/Users/tharinchemchan/.nuget/packages:/home/app/.nuget/packages"
     working_dir: "/app"
@@ -31,7 +49,7 @@ services:
     environment:
       ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net8.0/ServiceA.staticwebassets.runtime.CT.json"
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "servicea:dev"
+    image: "noieeen/servicea:dev"
     ports: []
     volumes:
     - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/ServiceA:/app:rw"
@@ -49,7 +67,7 @@ services:
     - "/app/bin/Debug/net8.0/AuthService.dll"
     environment:
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "serviceauth:dev"
+    image: "noieeen/serviceauth:dev"
     ports: []
     volumes:
     - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/AuthService:/app:rw"
@@ -68,7 +86,7 @@ services:
     environment:
       ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net8.0/ServiceB.staticwebassets.runtime.CT.json"
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "serviceb:dev"
+    image: "noieeen/serviceb:dev"
     ports: []
     volumes:
     - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/ServiceB:/app:rw"

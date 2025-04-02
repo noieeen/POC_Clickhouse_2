@@ -4,7 +4,7 @@ include:
 services:
   # Service A: Main application
   service_a:
-    image: servicea
+    image: noieeen/servicea
     platform: linux/amd64
     build:
       context: .
@@ -20,7 +20,7 @@ services:
   
   # Service B: 2nd application
   service_b:
-    image: serviceb
+    image: noieeen/serviceb
     platform: linux/amd64
     build:
       context: .
@@ -36,7 +36,7 @@ services:
 
   # Service Auth
   service_auth: # connect mssql
-    image: serviceauth
+    image: noieeen/serviceauth
     platform: linux/amd64
     build:
       context: .
@@ -56,7 +56,7 @@ services:
     
     # API
   api_auth:
-    image: auth.api
+    image: noieeen/auth.api
     platform: linux/amd64
     build:
       context: .
@@ -66,6 +66,24 @@ services:
     #      - ConnectionStrings__DefaultConnection=Server=localhost;Database=Mock_Monitoring_DB;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
     ports:
       - "9001:8080"
+    depends_on:
+      otel-collector:
+        condition: service_started
+      database-server:
+        condition: service_healthy
+    networks:
+      - monitoring-network
+  
+  api_store:
+    image: store.api
+    build:
+      context: .
+      dockerfile: Store.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    #      - ConnectionStrings__DefaultConnection=Server=localhost;Database=Mock_Monitoring_DB;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+    ports:
+      - "9002:8080"
     depends_on:
       otel-collector:
         condition: service_started
@@ -295,6 +313,8 @@ volumes:
   prometheus-data:
   clickhouse-data:
   grafana-data:
+
+
 
 
 
