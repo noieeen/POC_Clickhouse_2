@@ -3,6 +3,7 @@ using Core.Api.Controller;
 using Core.Models;
 using Core.Services.ProductService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Store.Api.Controllers;
 
