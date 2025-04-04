@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  monitoring-network:
+    driver: bridge
+    
 services:
   # SQL_Server
   database-server:

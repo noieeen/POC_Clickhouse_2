@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
+using Core.Services.CacheService;
 using Product = Database.Models.DBModel.Product;
 
 namespace Core.Services.ProductService;
@@ -12,11 +13,13 @@ public class ProductService : IProductService
 {
     private readonly AppDbContext _context;
     private readonly ILogger<ProductService> _logger;
-    private readonly IDistributedCache _cache;
+    private readonly IRedisCacheService _cache;
+
+    private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(10);
 
     public ProductService(AppDbContext context,
         ILogger<ProductService> logger,
-        IDistributedCache cache)
+        IRedisCacheService cache)
     {
         _context = context;
         _logger = logger;
@@ -25,22 +28,61 @@ public class ProductService : IProductService
 
     public List<Product> GetAllProducts()
     {
-        return _context.Products.ToList();
+        var cacheKey = "all_products";
+        var cachedProducts = _cache.GetCacheValue<List<Product>>(cacheKey);
+        if (cachedProducts != null)
+        {
+            return cachedProducts;
+        }
+
+        var products = _context.Products.ToList();
+        if (products.Any())
+        {
+            _cache.SetCacheValue(cacheKey, products, CacheExpiration);
+
+
+            return products;
+        }
+        else
+        {
+            _logger.LogInformation("No products found");
+        }
+
+        return products;
     }
 
     public async Task<List<Product>> GetAllProductsAsync()
     {
-        return await _context.Products.ToListAsync();
+        var cacheKey = "all_products";
+        var cachedProducts = await _cache.GetCacheValueAsync<List<Product>>(cacheKey);
+        if (cachedProducts != null)
+        {
+            return cachedProducts;
+        }
+
+        var products = await _context.Products.ToListAsync();
+        if (products.Any())
+        {
+            await _cache.SetCacheValueAsync(cacheKey, products, CacheExpiration);
+
+            return products;
+        }
+        else
+        {
+            _logger.LogInformation("No products found");
+        }
+
+        return products;
     }
 
     public async Task<Product> GetProduct(int productId)
     {
         string cacheKey = $"product:{productId}";
-        var cachedProduct = await _cache.GetStringAsync(cacheKey);
+        var cachedProduct = await _cache.GetCacheValueAsync<Product>(cacheKey);
 
         if (cachedProduct != null)
         {
-            return JsonSerializer.Deserialize<Product>(cachedProduct);
+            return cachedProduct;
         }
 
         var product = await _context.Products.FindAsync(productId);
@@ -50,11 +92,8 @@ public class ProductService : IProductService
             throw new ArgumentNullException($"Product not found: {productId}");
         }
 
-        await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(product),
-            new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
-            });
+        await _cache.SetCacheValueAsync(cacheKey, product, CacheExpiration);
+
 
         return product;
     }

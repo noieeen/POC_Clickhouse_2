@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.EntityFrameworkCore.SqlServer.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -8,7 +7,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.Instrumentation.SqlClient;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -86,7 +84,7 @@ public static class Extensions
         builder.Services.AddOpenTelemetry()
             .WithTracing(tracing =>
             {
-                // tracing.AddConsoleExporter();
+                tracing.AddConsoleExporter();
                 tracing
                     .AddAspNetCoreInstrumentation()
                     .AddJaegerExporter()
@@ -94,8 +92,8 @@ public static class Extensions
                     .AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddSqlClientInstrumentation()
-                    .AddEntityFrameworkCoreInstrumentation();
-
+                    .AddEntityFrameworkCoreInstrumentation()
+                    .AddRedisInstrumentation();
                 // tracing.AddSource(SqlClientTraceInstrumentationOptions);
             });
 
