@@ -4,6 +4,7 @@
     <attachedFolders>
       <Path>Composes</Path>
       <Path>Tests</Path>
+      <Path>configs</Path>
     </attachedFolders>
     <explicitIncludes />
     <explicitExcludes />

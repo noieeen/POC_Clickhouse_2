@@ -93,8 +93,8 @@ public static class Extensions
                     .AddHttpClientInstrumentation()
                     .AddSqlClientInstrumentation()
                     .AddEntityFrameworkCoreInstrumentation()
-                    .AddRedisInstrumentation();
-                // tracing.AddSource(SqlClientTraceInstrumentationOptions);
+                    .AddRedisInstrumentation()
+                    .AddMassTransitInstrumentation();
             });
 
         builder.AddOpenTelemetryExporters();
