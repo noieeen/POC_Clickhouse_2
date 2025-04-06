@@ -75,6 +75,10 @@ scrape_configs:
           #        labels:
           #          group: 'infra'
 
-
+  - job_name: 'RabbitMQ'
+    static_configs:
+      - targets: [ 'rabbitmq:15692' ]
+        labels:
+          group: 'infra'
           
         

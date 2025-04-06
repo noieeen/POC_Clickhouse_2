@@ -18,7 +18,7 @@ services:
   # Redis
   redis:
     image: redis:8.0-M04-bookworm
-    platform: linux/amd64
+    platform: linux/arm64
     healthcheck:
       test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
       interval: 1s
@@ -58,7 +58,7 @@ services:
   #  # SQL_Server
   #  database.server:
   #    image: mcr.microsoft.com/mssql/server:2022-latest
-  #    platform: linux/amd64
+  #    platform: linux/arm64
   #    container_name: database.server
   #    #    hostname: mssql_db
   #    restart: always
@@ -224,5 +224,30 @@ services:
       - prometheus
       - jaeger
       - clickhouse
+    networks:
+      - monitoring-network
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    platform: linux/arm64
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"       # AMQP protocol
+      - "15672:15672"     # Management UI
+      - "15692:15692"     # Prometheus metrics endpoint
+#    command:
+#      [ "sudo docker exec -it rabbitmq bash" ]
+    #      ["rabbitmq-plugins enable rabbitmq_prometheus" ]
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+#      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: '-rabbit prometheus.tcp.port 15692'
+    volumes:
+      - ./data/rabbitmq-data:/var/lib/rabbitmq
     networks:
       - monitoring-network
