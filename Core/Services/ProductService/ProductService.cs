@@ -2,8 +2,6 @@ using Core.Models;
 using Database.Models.DBModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Text.Json;
 using Core.Services.CacheService;
 using Product = Database.Models.DBModel.Product;
 
@@ -75,7 +73,30 @@ public class ProductService : IProductService
         return products;
     }
 
-    public async Task<Product> GetProduct(int productId)
+    public Product? GetProduct(int productId)
+    {
+        string cacheKey = $"product:{productId}";
+        var cachedProduct = _cache.GetCacheValue<Product>(cacheKey);
+
+        if (cachedProduct != null)
+        {
+            return cachedProduct;
+        }
+
+        var product = _context.Products.Find(productId);
+        if (product == null)
+        {
+            _logger.LogError("Product not found: {ProductId}", productId);
+            return null;
+        }
+
+        _cache.SetCacheValue(cacheKey, product, CacheExpiration);
+
+
+        return product;
+    }
+
+    public async Task<Product?> GetProductAsync(int productId)
     {
         string cacheKey = $"product:{productId}";
         var cachedProduct = await _cache.GetCacheValueAsync<Product>(cacheKey);
@@ -89,7 +110,7 @@ public class ProductService : IProductService
         if (product == null)
         {
             _logger.LogError("Product not found: {ProductId}", productId);
-            throw new ArgumentNullException($"Product not found: {productId}");
+            return null;
         }
 
         await _cache.SetCacheValueAsync(cacheKey, product, CacheExpiration);
@@ -132,9 +153,21 @@ public class ProductService : IProductService
         return product;
     }
 
-    public async Task<bool> DeleteProduct(int productId)
+    public bool DeleteProduct(int productId)
     {
-        var product = await GetProduct(productId);
+        var product = GetProduct(productId);
+        _context.Products.Remove(product);
+        _context.SaveChangesAsync();
+
+        _cache.Remove($"product:{productId}");
+        _cache.Remove("all_products");
+
+        return true;
+    }
+
+    public async Task<bool> DeleteProductAsync(int productId)
+    {
+        var product = await GetProductAsync(productId);
         _context.Products.Remove(product);
         await _context.SaveChangesAsync();
 
@@ -144,9 +177,27 @@ public class ProductService : IProductService
         return true;
     }
 
-    public async Task<Product> UpdateProduct(UpdateProductReq productReq)
+    public Product UpdateProduct(UpdateProductReq productReq)
     {
-        var existProduct = await GetProduct(productReq.id);
+        var existProduct = GetProduct(productReq.id);
+
+        existProduct.Name = productReq.name;
+        existProduct.Price = productReq.price;
+        existProduct.StockQuantity = productReq.quantity;
+        existProduct.UpdatedAt = DateTime.UtcNow;
+
+        _context.Products.Update(existProduct);
+        _context.SaveChangesAsync();
+
+        _cache.Remove($"product:{productReq.id}");
+        _cache.Remove("all_products");
+
+        return existProduct;
+    }
+
+    public async Task<Product> UpdateProductAsync(UpdateProductReq productReq)
+    {
+        var existProduct = await GetProductAsync(productReq.id);
 
         existProduct.Name = productReq.name;
         existProduct.Price = productReq.price;

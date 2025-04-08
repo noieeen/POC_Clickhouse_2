@@ -7,9 +7,11 @@ using Database.Models.DBModel;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Serilog;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 var serviceName = Assembly.GetCallingAssembly().GetName().Name ?? "Service";
 var serviceVersion = "1.0.0";
 
@@ -22,6 +24,8 @@ var resourceBuilder = ResourceBuilder.CreateDefault()
     });
 
 builder.AddServiceDefaults(resourceBuilder);
+builder.AddDefaultLogging();
+
 var connectionString = builder.Configuration.GetConnectionString("DbConnectionString");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
@@ -31,30 +35,12 @@ builder.Services.AddScoped<IProductService, ProductService>(); // Register the c
 builder.Services.AddDistributedMemoryCache();
 var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
 var redis = ConnectionMultiplexer.Connect(redisConnectionString);
+
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
 
-// IConnectionMultiplexer redisMultiplexer = ConnectionMultiplexer.Connect(redisConnectionString);
-
-// IDatabase db = redis.GetDatabase();
-//
-// Configure Redis connection
-// builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-//     ConnectionMultiplexer.Connect(redisConnectionString));
-//
-// builder.Services.AddSingleton<IConnectionMultiplexer>(
-//     sp => redisMultiplexer..CreateConnection(sp));
-
-// Add Redis distributed cache
-// builder.Services.AddStackExchangeRedisCache(options =>
-// {
-//     options.Configuration = redisConnectionString;
-//     options.InstanceName = "Store_Api_Instance";
-// });
-
 builder.Services.AddOpenTelemetry()
     .WithTracing(tr => tr.AddRedisInstrumentation(redis));
-
 
 // Register the correct implementation
 builder.Services

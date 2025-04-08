@@ -34,7 +34,7 @@ public class ProductController : BaseApiController
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProduct(int id)
     {
-        var product = await _productService.GetProduct(id);
+        var product = await _productService.GetProductAsync(id);
         if (product == null)
         {
             return NotFound();
@@ -53,14 +53,14 @@ public class ProductController : BaseApiController
     [HttpPut]
     public async Task<IActionResult> UpdateProduct([FromBody] UpdateProductReq productReq)
     {
-        var updatedProduct = await _productService.UpdateProduct(productReq);
+        var updatedProduct = await _productService.UpdateProductAsync(productReq);
         return Ok(updatedProduct);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(int id)
     {
-        var result = await _productService.DeleteProduct(id);
+        var result = await _productService.DeleteProductAsync(id);
         if (!result)
         {
             return NotFound();

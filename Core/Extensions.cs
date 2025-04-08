@@ -5,11 +5,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Serilog;
+using Serilog.Sinks.OpenTelemetry;
 
 namespace Core;
 
@@ -84,7 +85,7 @@ public static class Extensions
         builder.Services.AddOpenTelemetry()
             .WithTracing(tracing =>
             {
-                tracing.AddConsoleExporter();
+                // tracing.AddConsoleExporter();
                 tracing
                     .AddAspNetCoreInstrumentation()
                     .AddJaegerExporter()
@@ -146,6 +147,49 @@ public static class Extensions
         builder.Services.AddHealthChecks()
             // Add a default liveness check to ensure app is responsive
             .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
+
+        return builder;
+    }
+
+    public static IHostApplicationBuilder AddDefaultLogging(this IHostApplicationBuilder builder)
+    {
+        var otelConnectionString = builder.Configuration.GetConnectionString("OTLP_ENDPOINT_HTTP_URL") ??
+                                   throw new ArgumentNullException(
+                                       "builder.Configuration.GetConnectionString(\"OTLP_ENDPOINT_HTTP_URL\")");
+
+        if (!string.IsNullOrWhiteSpace(otelConnectionString))
+        {
+            var loggerConfig = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)
+                .Enrich.FromLogContext();
+
+            loggerConfig.WriteTo.OpenTelemetry(options =>
+            {
+                options.Endpoint = otelConnectionString;
+                options.Protocol = OtlpProtocol.HttpProtobuf;
+            });
+
+            if (builder.Environment.IsDevelopment())
+            {
+                loggerConfig.WriteTo.Console();
+            }
+
+            Log.Logger = loggerConfig.CreateLogger();
+
+            builder.Logging.ClearProviders();
+
+            if (builder.Environment.IsDevelopment())
+            {
+                builder.Logging.AddConsole();
+            }
+
+            builder.Logging.AddSerilog(Log.Logger, dispose: true);
+        }
+        else if (builder.Environment.IsDevelopment())
+        {
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+        }
 
         return builder;
     }
