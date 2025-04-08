@@ -14,9 +14,6 @@ using Serilog.Sinks.OpenTelemetry;
 
 namespace Core;
 
-// Adds common .NET Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
-// This project should be referenced by each service project in your solution.
-// To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
 public static class Extensions
 {
     public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder,
@@ -33,21 +30,11 @@ public static class Extensions
             builder.Logging.AddOpenTelemetry(options => options.SetResourceBuilder(resourceBuilder));
         }
 
-
         builder.ConfigureOpenTelemetry();
-
         builder.AddDefaultHealthChecks();
-
         builder.Services.AddServiceDiscovery();
 
-        builder.Services.ConfigureHttpClientDefaults(http =>
-        {
-            // Turn on resilience by default
-            // http.AddStandardResilienceHandler();
-
-            // Turn on service discovery by default
-            http.AddServiceDiscovery();
-        });
+        builder.Services.ConfigureHttpClientDefaults(http => { http.AddServiceDiscovery(); });
 
         return builder;
     }
@@ -58,7 +45,9 @@ public static class Extensions
 
         builder.Logging.AddOpenTelemetry(logging =>
         {
-            if (builder.Environment.IsDevelopment()) logging.AddConsoleExporter();
+            if (builder.Environment.IsDevelopment())
+                logging.AddConsoleExporter();
+
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
         });
@@ -66,18 +55,14 @@ public static class Extensions
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
             {
-                // metrics.AddConsoleExporter();
                 metrics
-                    .AddAspNetCoreInstrumentation()
                     .AddPrometheusExporter()
                     .AddProcessInstrumentation()
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
-                    // Metrics provides by ASP.NET Core in .NET 8
                     .AddMeter(["Microsoft.AspNetCore.Hosting"])
                     .AddMeter(["Microsoft.AspNetCore.Server.Kestrel"])
-                    // Metrics provided by System.Net libraries
                     .AddMeter(["System.Net.Http"])
                     .AddMeter(["System.Net.NameResolution"]);
             });
@@ -85,11 +70,13 @@ public static class Extensions
         builder.Services.AddOpenTelemetry()
             .WithTracing(tracing =>
             {
-                // tracing.AddConsoleExporter();
                 tracing
-                    .AddAspNetCoreInstrumentation()
+                    .AddAspNetCoreInstrumentation(options =>
+                    {
+                        options.Filter = httpContext =>
+                            !httpContext.Request.Path.StartsWithSegments("/metrics");
+                    })
                     .AddJaegerExporter()
-                    // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     .AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddSqlClientInstrumentation()
@@ -103,7 +90,6 @@ public static class Extensions
         return builder;
     }
 
-
     private static IHostApplicationBuilder AddOpenTelemetryExporters(this IHostApplicationBuilder builder)
     {
         var otelConnectionString = builder.Configuration.GetConnectionString("OTLP_ENDPOINT_URL") ??
@@ -112,8 +98,6 @@ public static class Extensions
 
         if (!string.IsNullOrWhiteSpace(otelConnectionString))
         {
-            // builder.Services.AddOpenTelemetry().UseOtlpExporter();
-
             builder.Services.AddOpenTelemetry().WithMetrics(options => options.AddOtlpExporter(x =>
             {
                 x.Endpoint = new Uri(otelConnectionString);
@@ -126,16 +110,11 @@ public static class Extensions
                 x.Protocol = OtlpExportProtocol.Grpc;
             }));
 
-            builder.Logging.AddOpenTelemetry(options => options.AddOtlpExporter(x =>
-            {
-                x.Endpoint = new Uri(otelConnectionString);
-                x.Protocol = OtlpExportProtocol.Grpc;
-            }));
-
-            // builder.Services.AddOpenTelemetry().WithLogging(options => options.AddOtlpExporter(x =>
+            // Optional OTLP log export (currently commented out)
+            // builder.Logging.AddOpenTelemetry(options => options.AddOtlpExporter(x =>
             // {
             //     x.Endpoint = new Uri(otelConnectionString);
-            //     // x.Protocol = OtlpExportProtocol.Grpc;
+            //     x.Protocol = OtlpExportProtocol.Grpc;
             // }));
         }
 
@@ -145,7 +124,6 @@ public static class Extensions
     public static IHostApplicationBuilder AddDefaultHealthChecks(this IHostApplicationBuilder builder)
     {
         builder.Services.AddHealthChecks()
-            // Add a default liveness check to ensure app is responsive
             .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
 
         return builder;
@@ -160,8 +138,11 @@ public static class Extensions
         if (!string.IsNullOrWhiteSpace(otelConnectionString))
         {
             var loggerConfig = new LoggerConfiguration()
+                .Filter.ByExcluding("RequestPath like '/health%'")
+                .Filter.ByExcluding("RequestPath like '/metrics%'")
                 .ReadFrom.Configuration(builder.Configuration)
                 .Enrich.FromLogContext();
+
 
             loggerConfig.WriteTo.OpenTelemetry(options =>
             {
@@ -196,14 +177,10 @@ public static class Extensions
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
-        // Adding health checks endpoints to applications in non-development environments has security implications.
-        // See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
         if (app.Environment.IsDevelopment())
         {
-            // All health checks must pass for app to be considered ready to accept traffic after starting
             app.MapHealthChecks("/health");
 
-            // Only health checks tagged with the "live" tag must pass for app to be considered alive
             app.MapHealthChecks("/alive", new HealthCheckOptions
             {
                 Predicate = r => r.Tags.Contains("live")
