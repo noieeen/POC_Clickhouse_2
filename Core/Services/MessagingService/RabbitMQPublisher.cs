@@ -12,6 +12,8 @@ namespace Core.Services.MessagingService;
 public class RabbitMQPublisher<T> : IRabbitMQPublisher<T>
 {
     private readonly RabbitMQSetting _rabbitMqSetting;
+    // const string _queueName = "payment";
+    // const string _exchangeName = "store.exchange";
 
     public RabbitMQPublisher(IOptions<RabbitMQSetting> rabbitMqSetting)
     {
@@ -38,7 +40,6 @@ public class RabbitMQPublisher<T> : IRabbitMQPublisher<T>
         var body = Encoding.UTF8.GetBytes(messageJson);
         var props = new BasicProperties();
         // Publish message to the queue
-
-        await channel.BasicPublishAsync("exchangeName", "routingKey", false, props, body);
+        await channel.BasicPublishAsync("", queueName, false, props, body);
     }
 }

@@ -1,7 +1,11 @@
 using System.Reflection;
 using Core;
 using Core.Factory;
+using Core.Models;
+using Core.ServiceConfigs;
 using Core.Services.CacheService;
+using Core.Services.MessagingService;
+using Core.Services.OrderService;
 using Core.Services.ProductService;
 using Database.Models.DBModel;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +34,7 @@ var connectionString = builder.Configuration.GetConnectionString("DbConnectionSt
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddScoped<IProductService, ProductService>(); // Register the correct implementation
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 // Redis
 builder.Services.AddDistributedMemoryCache();
@@ -42,6 +47,14 @@ builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
 builder.Services.AddOpenTelemetry()
     .WithTracing(tr => tr.AddRedisInstrumentation(redis));
 
+// RabbitMQ
+builder.AddQueueServiceDefaults();
+// Inject settings
+builder.Services.Configure<RabbitMQSetting>(
+    builder.Configuration.GetSection("RabbitMQSetting")
+);
+builder.Services.AddSingleton<IRabbitMQPublisher<OrderReq>, RabbitMQPublisher<OrderReq>>();
+builder.Services.AddSingleton<IRabbitMQConsumer, RabbitMQConsumer>();
 // Register the correct implementation
 builder.Services
     .AddSingleton<ICommon_Exception_Factory, Common_Exception_Factory>()
@@ -74,4 +87,7 @@ app.MapControllerRoute(
 
 app.MapDefaultEndpoints();
 
+// Start consuming messages in the background
+var consumer = app.Services.GetRequiredService<IRabbitMQConsumer>();
+await consumer.StartConsuming("orderValidationQueue");
 app.Run();

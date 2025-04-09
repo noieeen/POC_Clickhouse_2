@@ -1,22 +1,23 @@
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using System.Text;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using RabbitMQ.Client.Events;
 
 
 namespace Core.Services.MessagingService;
 
-public class RabbitMQConsumer : IRabbitMQConsumer
+public class RabbitMQConsumerService : BackgroundService
 {
     private readonly RabbitMQSetting _rabbitMqSetting;
 
-    public RabbitMQConsumer(IOptions<RabbitMQSetting> rabbitMqSetting)
+    public RabbitMQConsumerService(IOptions<RabbitMQSetting> rabbitMqSetting)
     {
         _rabbitMqSetting = rabbitMqSetting.Value;
     }
 
-    public async Task StartConsuming(string queueName)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var factory = new ConnectionFactory
         {
@@ -31,8 +32,8 @@ public class RabbitMQConsumer : IRabbitMQConsumer
         using IConnection connection = await factory.CreateConnectionAsync();
         using IChannel channel = await connection.CreateChannelAsync();
 
-        await channel.QueueDeclareAsync(queueName, durable: false, exclusive: false, autoDelete: false,
-            arguments: null);
+        // await channel.QueueDeclareAsync(queueName, durable: false, exclusive: false, autoDelete: false,
+        //     arguments: null);
 
         // Concurrent
         // Fair dispatch - don't give more than one message to a worker at a time
@@ -52,6 +53,6 @@ public class RabbitMQConsumer : IRabbitMQConsumer
             // return Task.CompletedTask;
         };
 
-        await channel.BasicConsumeAsync(queueName, autoAck: true, consumer);
+        // await channel.BasicConsumeAsync(queueName, autoAck: true, consumer);
     }
 }

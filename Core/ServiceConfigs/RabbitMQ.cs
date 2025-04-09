@@ -1,28 +1,33 @@
+using Core.Services.MessagingService;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace Core.ServiceConfigs;
 
 public static class RabbitMQ
 {
-    public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder AddQueueServiceDefaults(this IHostApplicationBuilder builder)
     {
-        var connectString = builder.Configuration.GetConnectionString("RABBITMQ_CONNECT_STRING");
+        var rabbitSection = builder.Configuration.GetSection("RabbitMQSetting");
+        builder.Services.Configure<RabbitMQSetting>(rabbitSection);
+        var rabbitMQSetting = rabbitSection.Get<RabbitMQSetting>();
+
         builder.Services.AddMassTransit(x =>
         {
             x.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host("rabbitmq://localhost", h =>
+                cfg.Host(rabbitMQSetting.HostName, h =>
                 {
-                    h.Username("guest");
-                    h.Password("guest");
+                    h.Username(rabbitMQSetting.UserName);
+                    h.Password(rabbitMQSetting.Password);
                 });
 
                 cfg.ConfigureEndpoints(context);
             });
         });
-        
+
         return builder;
     }
 }
