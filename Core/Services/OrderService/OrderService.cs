@@ -12,9 +12,10 @@ public class OrderService : IOrderService
         _rabbitMqPublisher = rabbitMqPublisher;
     }
 
-    public async Task PlaceOrderAsync(OrderReq order)
+    public async Task<Guid?> PlaceOrderAsync(OrderReq order)
     {
         // Publish order to RabbitMQ for validation
         await _rabbitMqPublisher.PublishMessageAsync(order, RabbitMQQueues.OrderValidationQueue);
+        return order.OrderId!;
     }
 }

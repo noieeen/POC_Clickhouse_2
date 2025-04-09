@@ -11,13 +11,15 @@ namespace Core.Services.MessagingService;
 public class RabbitMQConsumerService : BackgroundService
 {
     private readonly RabbitMQSetting _rabbitMqSetting;
+    private IConnection? _connection;
+    private IChannel? _channel;
 
     public RabbitMQConsumerService(IOptions<RabbitMQSetting> rabbitMqSetting)
     {
         _rabbitMqSetting = rabbitMqSetting.Value;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public override async Task StartAsync(CancellationToken cancellationToken)
     {
         var factory = new ConnectionFactory
         {
@@ -26,21 +28,23 @@ public class RabbitMQConsumerService : BackgroundService
             Password = _rabbitMqSetting.Password
         };
 
-        // For ConnectionString
-        // factory.Uri = new Uri("amqp://user:pass@hostName:port/vhost");
+        _connection = await factory.CreateConnectionAsync();
+        _channel = await _connection.CreateChannelAsync();
 
-        using IConnection connection = await factory.CreateConnectionAsync();
-        using IChannel channel = await connection.CreateChannelAsync();
+        await _channel.QueueDeclareAsync(
+            queue: RabbitMQQueues.OrderValidationQueue,
+            durable: false,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null
+        );
 
-        // await channel.QueueDeclareAsync(queueName, durable: false, exclusive: false, autoDelete: false,
-        //     arguments: null);
+        await base.StartAsync(cancellationToken);
+    }
 
-        // Concurrent
-        // Fair dispatch - don't give more than one message to a worker at a time
-        // await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
-
-
-        var consumer = new AsyncEventingBasicConsumer(channel);
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.ReceivedAsync += async (model, ea) =>
         {
             var body = ea.Body.ToArray();
@@ -49,10 +53,16 @@ public class RabbitMQConsumerService : BackgroundService
             // Handle the message (you can deserialize it here if necessary)
             Console.WriteLine($"Received message: {message}");
             // Acknowledge message was processed
-            await channel.BasicAckAsync(deliveryTag: ea.DeliveryTag, multiple: false);
-            // return Task.CompletedTask;
+            await _channel.BasicAckAsync(deliveryTag: ea.DeliveryTag, multiple: false);
         };
+        _channel.BasicConsumeAsync(RabbitMQQueues.OrderValidationQueue, autoAck: false, consumer);
+        return Task.CompletedTask;
+    }
 
-        // await channel.BasicConsumeAsync(queueName, autoAck: true, consumer);
+    public override async void Dispose()
+    {
+        await _channel?.CloseAsync();
+        await _connection?.CloseAsync();
+        base.Dispose();
     }
 }

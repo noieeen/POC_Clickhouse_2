@@ -43,12 +43,12 @@ public class OrderController : BaseApiController
             if (order == null) return BadRequest("Invalid order.");
 
             // Call the OrderService to place the order and publish to the queue
-            await _orderService.PlaceOrderAsync(order);
+            var result = await _orderService.PlaceOrderAsync(order);
+            return Ok($"Order: {result} placed successfully.");
         }
         catch (Exception e)
         {
             return BadRequest(e.Message);
         }
-        return Ok("Order placed successfully.");
     }
 }

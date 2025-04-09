@@ -4,5 +4,5 @@ namespace Core.Services.OrderService;
 
 public interface IOrderService
 {
-    Task PlaceOrderAsync(OrderReq order);
+    Task<Guid?> PlaceOrderAsync(OrderReq order);
 }
