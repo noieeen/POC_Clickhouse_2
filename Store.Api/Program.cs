@@ -4,6 +4,7 @@ using Core.Factory;
 using Core.Models;
 using Core.ServiceConfigs;
 using Core.Services.CacheService;
+using Core.Services.DistributeService;
 using Core.Services.MessagingService;
 using Core.Services.OrderService;
 using Core.Services.ProductService;
@@ -46,7 +47,7 @@ builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
 builder.Services.AddOpenTelemetry()
     .WithTracing(tr => tr.AddRedisInstrumentation(redis));
 
-// RabbitMQ
+// === Start RabbitMQ === //
 builder.AddQueueServiceDefaults();
 // Inject settings
 builder.Services.Configure<RabbitMQSetting>(
@@ -57,7 +58,14 @@ builder.Services.AddSingleton<IRabbitMQPublisher<OrderReq>, RabbitMQPublisher<Or
 
 // Alive consumer
 builder.Services.AddHostedService<RabbitMQConsumerService>();
+// === End RabbitMQ === //
 
+// === Start Kafka === //
+// Inject settings
+builder.Services.Configure<KafkaSetting>(builder.Configuration.GetSection("KafkaSetting"));
+builder.Services.AddSingleton<IKafkaProducer, KafkaProducer>();
+builder.Services.AddHostedService<KafkaConsumer>();
+// === End Kafka === //
 // Register the correct implementation
 builder.Services
     .AddSingleton<ICommon_Exception_Factory, Common_Exception_Factory>()

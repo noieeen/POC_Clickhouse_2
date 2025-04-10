@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using System.Text;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OpenTelemetry.Context.Propagation;
 using RabbitMQ.Client.Events;
@@ -12,19 +13,24 @@ namespace Core.Services.MessagingService;
 
 public class RabbitMQConsumerService : BackgroundService
 {
+    private readonly ILogger<RabbitMQConsumerService> _logger;
+    private CancellationToken _cancellationToken;
     private readonly RabbitMQSetting _rabbitMqSetting;
     private IConnection? _connection;
     private IChannel? _channel;
     private static readonly ActivitySource _activitySource = new("RabbitMQConsumer");
     private static readonly TextMapPropagator Propagator = Propagators.DefaultTextMapPropagator;
 
-    public RabbitMQConsumerService(IOptions<RabbitMQSetting> rabbitMqSetting)
+    public RabbitMQConsumerService(IOptions<RabbitMQSetting> rabbitMqSetting, ILogger<RabbitMQConsumerService> logger)
     {
+        _logger = logger;
         _rabbitMqSetting = rabbitMqSetting.Value;
     }
 
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Starting RabbitMQConsumerService...");
+
         var factory = new ConnectionFactory
         {
             HostName = _rabbitMqSetting.HostName,
@@ -48,6 +54,14 @@ public class RabbitMQConsumerService : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _cancellationToken = stoppingToken;
+
+        if (_channel == null)
+        {
+            _logger.LogError("RabbitMQ channel not initialized. Aborting consumption.");
+            return Task.CompletedTask;
+        }
+
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.ReceivedAsync += async (model, ea) =>
         {
@@ -56,7 +70,8 @@ public class RabbitMQConsumerService : BackgroundService
             {
                 if (props.Headers != null && props.Headers.TryGetValue(key, out var val))
                 {
-                    return [Encoding.UTF8.GetString((byte[])val)];
+                    // return [Encoding.UTF8.GetString((byte[])val)];
+                    return new[] { Encoding.UTF8.GetString((byte[])val) };
                 }
 
                 return Enumerable.Empty<string>();
@@ -76,8 +91,7 @@ public class RabbitMQConsumerService : BackgroundService
             var message = Encoding.UTF8.GetString(body);
 
             // Handle the message (you can deserialize it here if necessary)
-            Console.WriteLine($"Received message: {message}");
-            // Acknowledge message was processed
+            _logger.LogInformation($"Received message: {message}");            // Acknowledge message was processed
             await _channel.BasicAckAsync(deliveryTag: ea.DeliveryTag, multiple: false);
         };
         _channel.BasicConsumeAsync(RabbitMQQueues.OrderValidationQueue, autoAck: false, consumer);
