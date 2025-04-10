@@ -26,7 +26,6 @@ var resourceBuilder = ResourceBuilder.CreateDefault()
     {
         ["module.name"] = "Store Api"
     });
-
 builder.AddServiceDefaults(resourceBuilder);
 builder.AddDefaultLogging();
 

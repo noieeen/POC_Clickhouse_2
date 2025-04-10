@@ -28,6 +28,13 @@ public static class RabbitMQ
             });
         });
 
+        builder.Services.AddOpenTelemetry().WithTracing(tracing =>
+        {
+            tracing // Add these lines 👇
+                .AddSource("RabbitMQConsumer")
+                .AddSource("RabbitMQPublisher");
+        });
+
         return builder;
     }
 }

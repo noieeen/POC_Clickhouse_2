@@ -64,7 +64,9 @@ public static class Extensions
                     .AddMeter(["Microsoft.AspNetCore.Hosting"])
                     .AddMeter(["Microsoft.AspNetCore.Server.Kestrel"])
                     .AddMeter(["System.Net.Http"])
-                    .AddMeter(["System.Net.NameResolution"]);
+                    .AddMeter(["System.Net.NameResolution"])
+                    // RabbitMQ
+                    .AddMeter(["RabbitMQ.Metrics"]);
             });
 
         builder.Services.AddOpenTelemetry()

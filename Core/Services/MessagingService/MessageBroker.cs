@@ -14,3 +14,9 @@ public static class RabbitMQQueues
     public const string AnotherQueue = "anotherQueue";
     public const string ThirdQueue = "thirdQueue";
 }
+
+public static class RabbitMQExchange
+{
+    public const string OrderExchange = "OrderExchange";
+
+}
