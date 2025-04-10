@@ -80,5 +80,15 @@ scrape_configs:
       - targets: [ 'rabbitmq:15692' ]
         labels:
           group: 'infra'
-          
-        
+
+  - job_name: "zookeeper-server"
+    static_configs:
+      - targets: [ "zookeeper:7072" ]
+        labels:
+          group: "kafka"
+
+  - job_name: 'kafka'
+    static_configs:
+      - targets: [ 'kafka:9101' ]
+        labels:
+          group: "kafka"

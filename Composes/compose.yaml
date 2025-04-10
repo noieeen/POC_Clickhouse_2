@@ -2,7 +2,7 @@
 include:
   - services-compose.yaml
   - mssql-compose.yaml
-  - kafka-compose.yaml
+#  - kafka-compose.yaml
 services:
   # Service A: Main application
   service_a:

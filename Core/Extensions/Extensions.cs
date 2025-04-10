@@ -140,8 +140,8 @@ public static class Extensions
         if (!string.IsNullOrWhiteSpace(otelConnectionString))
         {
             var loggerConfig = new LoggerConfiguration()
-                .Filter.ByExcluding("RequestPath like '/health%'")
-                .Filter.ByExcluding("RequestPath like '/metrics%'")
+                // .Filter.ByExcluding("RequestPath like '/health%'")
+                // .Filter.ByExcluding("RequestPath like '/metrics%'")
                 .ReadFrom.Configuration(builder.Configuration)
                 .Enrich.FromLogContext();
 
