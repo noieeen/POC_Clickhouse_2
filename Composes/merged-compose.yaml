@@ -16,7 +16,7 @@ services:
   # Service A: Main application
   service_a:
     image: noieeen/servicea
-    platform: linux/arm64
+    platform: linux/amd64
     build:
       context: .
       dockerfile: ../ServiceA/Dockerfile
@@ -32,7 +32,7 @@ services:
   # Service B: 2nd application
   service_b:
     image: noieeen/serviceb
-    platform: linux/arm64
+    platform: linux/amd64
     build:
       context: .
       dockerfile: ../ServiceB/Dockerfile
@@ -48,7 +48,7 @@ services:
   # Service Auth
   service_auth: # connect mssql
     image: noieeen/serviceauth
-    platform: linux/arm64
+    platform: linux/amd64
     build:
       context: .
       dockerfile: ../AuthService/Dockerfile
@@ -67,7 +67,7 @@ services:
     # API
   api_auth:
     image: noieeen/auth.api
-    platform: linux/arm64
+    platform: linux/amd64
     build:
       context: .
       dockerfile: ../Auth.Api/Dockerfile
@@ -85,7 +85,7 @@ services:
   
   api_store:
     image: noieeen/store.api
-    platform: linux/arm64
+    platform: linux/amd64
     build:
       context: .
       dockerfile: ../Store.Api/Dockerfile
@@ -131,7 +131,7 @@ services:
     # Redis
   redis:
     image: redis:8.0-M04-bookworm
-    platform: linux/arm64
+    platform: linux/amd64
     healthcheck:
       test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
       interval: 1s
@@ -171,7 +171,7 @@ services:
     #  # SQL_Server
     #  database.server:
     #    image: mcr.microsoft.com/mssql/server:2022-latest
-    #    platform: linux/arm64
+    #    platform: linux/amd64
     #    container_name: database.server
     #    #    hostname: mssql_db
     #    restart: always
@@ -332,7 +332,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management
-    platform: linux/arm64
+    platform: linux/amd64
     #    container_name: rabbitmq
     ports:
       - "5672:5672"       # AMQP protocol
