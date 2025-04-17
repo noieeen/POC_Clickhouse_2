@@ -1,0 +1,95 @@
+# This is a generated file. Not intended for manual editing.
+version: "3.8"
+services:
+  api_auth:
+    build:
+      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Composes"
+      dockerfile: "../Auth.Api/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/Auth.Api.dll"
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "noieeen/auth.api:dev"
+    ports: []
+    volumes:
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Auth.Api:/app:rw"
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2:/src:rw"
+    - "/Users/tharinchemchan/.nuget/packages:/home/app/.nuget/packages"
+    working_dir: "/app"
+  api_store:
+    build:
+      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Composes"
+      dockerfile: "../Store.Api/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/Store.Api.dll"
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "noieeen/store.api:dev"
+    ports: []
+    volumes:
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Store.Api:/app:rw"
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2:/src:rw"
+    - "/Users/tharinchemchan/.nuget/packages:/home/app/.nuget/packages"
+    working_dir: "/app"
+  service_a:
+    build:
+      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Composes"
+      dockerfile: "../ServiceA/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/ServiceA.dll"
+    environment:
+      ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net8.0/ServiceA.staticwebassets.runtime.CT.json"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "noieeen/servicea:dev"
+    ports: []
+    volumes:
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/ServiceA:/app:rw"
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2:/src:rw"
+    - "/Users/tharinchemchan/.nuget/packages:/home/app/.nuget/packages"
+    working_dir: "/app"
+  service_auth:
+    build:
+      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Composes"
+      dockerfile: "../AuthService/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/AuthService.dll"
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "noieeen/serviceauth:dev"
+    ports: []
+    volumes:
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/AuthService:/app:rw"
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2:/src:rw"
+    - "/Users/tharinchemchan/.nuget/packages:/home/app/.nuget/packages"
+    working_dir: "/app"
+  service_b:
+    build:
+      context: "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/Composes"
+      dockerfile: "../ServiceB/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/ServiceB.dll"
+    environment:
+      ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net8.0/ServiceB.staticwebassets.runtime.CT.json"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "noieeen/serviceb:dev"
+    ports: []
+    volumes:
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2/ServiceB:/app:rw"
+    - "/Users/tharinchemchan/Dev Playground/LearnDotNet/POC_Clickhouse_2:/src:rw"
+    - "/Users/tharinchemchan/.nuget/packages:/home/app/.nuget/packages"
+    working_dir: "/app"

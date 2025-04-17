@@ -129,44 +129,44 @@ services:
       - monitoring-network
     
     # Redis
-    redis:
-      image: redis:8.0-M04-bookworm
-      platform: linux/arm64
-      healthcheck:
-        test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
-        interval: 1s
-        timeout: 3s
-        retries: 5
-      command: [ "redis-server" ] # Importance
-      environment:
-        - REDIS_REPLICATION_MODE=master
-        - REDIS_PASSWORD=my_master_password
-      volumes:
-        - ../data/redis_data:/bitnami/redis/data
-      #      - ./configs/redis:/opt/bitnami/scripts/redis/entrypoint.s
-      ports:
-        - "6379:6379"
-      depends_on:
-        - prometheus
-      networks:
-        - monitoring-network
-        - redis-exporter
+  redis:
+    image: redis:8.0-M04-bookworm
+    platform: linux/arm64
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    command: [ "redis-server" ] # Importance
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - REDIS_PASSWORD=my_master_password
+    volumes:
+      - ../data/redis_data:/bitnami/redis/data
+    #      - ./configs/redis:/opt/bitnami/scripts/redis/entrypoint.s
+    ports:
+      - "6379:6379"
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring-network
+      - redis-exporter
 
-    redis-exporter:
-      image: bitnami/redis-exporter:latest
-      ports:
-        - "9121:9121"
-      restart: unless-stopped
-      environment:
-        REDIS_ADDR: "redis:6379"
-        REDIS_USER: null
-        REDIS_PASSWORD: my_master_password
-      links:
-        - redis
-        - prometheus
-      networks:
-        - monitoring-network
-        - redis-exporter
+  redis-exporter:
+    image: bitnami/redis-exporter:latest
+    ports:
+      - "9121:9121"
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: "redis:6379"
+      REDIS_USER: null
+      REDIS_PASSWORD: my_master_password
+    links:
+      - redis
+      - prometheus
+    networks:
+      - monitoring-network
+      - redis-exporter
 
     #  # SQL_Server
     #  database.server:
@@ -229,127 +229,127 @@ services:
     #        echo "All done!";
 
     # OpenTelemetry Collector for monitoring
-    otel-collector:
-      image: otel/opentelemetry-collector-contrib:latest
-      command: [ "--config=/etc/otelcol-contrib/config.yaml" ]
-      volumes:
-        - ../configs/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
-      ports:
-        - "4317:4317"   # OTLP gRPC
-        - "4318:4318"   # OTLP HTTP
-        - "8888:8888"   # Metrics extension
-        - "13133:13133" # Health check
-      networks:
-        - monitoring-network
-      depends_on:
-        clickhouse:
-          condition: service_healthy
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: [ "--config=/etc/otelcol-contrib/config.yaml" ]
+    volumes:
+      - ../configs/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8888:8888"   # Metrics extension
+      - "13133:13133" # Health check
+    networks:
+      - monitoring-network
+    depends_on:
+      clickhouse:
+        condition: service_healthy
 
     # Prometheus for metrics storage
-    prometheus:
-      image: prom/prometheus:latest
-      volumes:
-        - ../configs/prometheus.yml:/etc/prometheus/prometheus.yml
-        - ../data/prometheus-data:/prometheus
-      ports:
-        - "9090:9090"
-      networks:
-        - monitoring-network
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ../configs/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../data/prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring-network
 
     # Jaeger for distributed tracing
-    jaeger:
-      image: jaegertracing/all-in-one:latest
-      environment:
-        - COLLECTOR_OTLP_ENABLED=true
-      ports:
-        - "16686:16686"  # UI
-        - "14250:14250"  # Model
-        - "14268:14268"  # Jaeger-collector HTTP
-      networks:
-        - monitoring-network
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"  # UI
+      - "14250:14250"  # Model
+      - "14268:14268"  # Jaeger-collector HTTP
+    networks:
+      - monitoring-network
 
     # Vector for log processing
-    vector:
-      image: timberio/vector:0.45.0-debian
-      command: [ "--config=/etc/vector/vector.toml" ] #,"--verbose" 
-      volumes:
-        - ../configs/vector.toml:/etc/vector/vector.toml
-      ports:
-        - "8383:8383"  # Vector API server
-        - "9598:9598"  # Vector metrics endpoint for Prometheus
-      networks:
-        - monitoring-network
-      depends_on:
-        - prometheus
-        - clickhouse
-        - otel-collector
+  vector:
+    image: timberio/vector:0.45.0-debian
+    command: [ "--config=/etc/vector/vector.toml" ] #,"--verbose" 
+    volumes:
+      - ../configs/vector.toml:/etc/vector/vector.toml
+    ports:
+      - "8383:8383"  # Vector API server
+      - "9598:9598"  # Vector metrics endpoint for Prometheus
+    networks:
+      - monitoring-network
+    depends_on:
+      - prometheus
+      - clickhouse
+      - otel-collector
 
     # ClickHouse for log storage
-    clickhouse:
-      image: clickhouse/clickhouse-server:latest
-      healthcheck:
-        test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8123/ping" ]
-        interval: 10s
-        timeout: 5s
-        retries: 3
-      volumes:
-        - ../data/clickhouse-data:/var/lib/clickhouse
-        - ../configs/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
-        - ../configs/clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml
-        - ../configs/clickhouse-users.xml:/etc/clickhouse-server/users.d/logging.xml
-      ports:
-        - "8123:8123"  # HTTP interface
-        - "9000:9000"  # Native interface
-      environment:
-        - CLICKHOUSE_DB=logs
-        - CLICKHOUSE_USER=default
-        - CLICKHOUSE_PASSWORD=
-        - CLICKHOUSE_ALWAYS_RUN_INITDB_SCRIPTS=1
-      networks:
-        - monitoring-network
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8123/ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ../data/clickhouse-data:/var/lib/clickhouse
+      - ../configs/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../configs/clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml
+      - ../configs/clickhouse-users.xml:/etc/clickhouse-server/users.d/logging.xml
+    ports:
+      - "8123:8123"  # HTTP interface
+      - "9000:9000"  # Native interface
+    environment:
+      - CLICKHOUSE_DB=logs
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=
+      - CLICKHOUSE_ALWAYS_RUN_INITDB_SCRIPTS=1
+    networks:
+      - monitoring-network
 
     # Grafana for visualization
-    grafana:
-      image: grafana/grafana:latest
-      volumes:
-        - ../data/grafana-data:/var/lib/grafana
-        - ../configs/grafana/provisioning:/etc/grafana/provisioning
-        - ../configs/grafana/dashboards:/var/lib/grafana/dashboards
-      environment:
-        - GF_SECURITY_ADMIN_PASSWORD=admin
-        - GF_SECURITY_ADMIN_USER=admin
-        - GF_USERS_ALLOW_SIGN_UP=false
-        - GF_INSTALL_PLUGINS=grafana-clickhouse-datasource
-        - GF_INSTALL_PLUGINS=maormil-rabbitmq-datasource
-      ports:
-        - "3000:3000"
-      depends_on:
-        - prometheus
-        - jaeger
-        - clickhouse
-      networks:
-        - monitoring-network
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - ../data/grafana-data:/var/lib/grafana
+      - ../configs/grafana/provisioning:/etc/grafana/provisioning
+      - ../configs/grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clickhouse-datasource
+      - GF_INSTALL_PLUGINS=maormil-rabbitmq-datasource
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - jaeger
+      - clickhouse
+    networks:
+      - monitoring-network
 
-    rabbitmq:
-      image: rabbitmq:4-management
-      platform: linux/arm64
-      #    container_name: rabbitmq
-      ports:
-        - "5672:5672"       # AMQP protocol
-        - "15672:15672"     # Management UI
-        - "15692:15692"     # Prometheus metrics endpoint
-      healthcheck:
-        test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
-        interval: 30s
-        timeout: 10s
-        retries: 5
-      environment:
-        RABBITMQ_DEFAULT_USER: guest
-        RABBITMQ_DEFAULT_PASS: guest
-      volumes:
-        - ../data/rabbitmq-data:/var/lib/rabbitmq
-      networks:
-        - monitoring-network
+  rabbitmq:
+    image: rabbitmq:4-management
+    platform: linux/arm64
+    #    container_name: rabbitmq
+    ports:
+      - "5672:5672"       # AMQP protocol
+      - "15672:15672"     # Management UI
+      - "15692:15692"     # Prometheus metrics endpoint
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - ../data/rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - monitoring-network
 
 
 
