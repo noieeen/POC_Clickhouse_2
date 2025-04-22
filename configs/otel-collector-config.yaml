@@ -45,18 +45,18 @@ exporters:
     endpoint: "0.0.0.0:8889"
     namespace: "dotnet_monitoring"
 
-  otlp/jaeger:
-    endpoint: "jaeger:4317"
-    tls:
-      insecure: true
-  
-  #  jaeger_storage_exporter:
-  #    trace_storage: some_storage
-
-  otlp/vector:
-    endpoint: "vector:4317"
-    tls:
-      insecure: true
+#  otlp/jaeger:
+#    endpoint: "jaeger:4317"
+#    tls:
+#      insecure: true
+#  
+#  #  jaeger_storage_exporter:
+#  #    trace_storage: some_storage
+#
+#  otlp/vector:
+#    endpoint: "vector:4317"
+#    tls:
+#      insecure: true
   
   
   clickhouse:
@@ -96,10 +96,10 @@ service:
       processors: [ memory_limiter/clickhouse, resourcedetection/system,  batch ]
       exporters: [ clickhouse ]
     
-    traces/jaeger:
-      receivers: [ otlp ]
-      processors: [ memory_limiter, batch ]
-      exporters: [ otlp/jaeger, spanmetrics ]
+#    traces/jaeger:
+#      receivers: [ otlp ]
+#      processors: [ memory_limiter, batch ]
+#      exporters: [ otlp/jaeger, spanmetrics ]
     
     traces/clickhouse:
       receivers: [ otlp ]
@@ -123,8 +123,8 @@ service:
       #      exporters: [ clickhouse ]
     
     
-    logs/vector:
-      receivers: [ otlp ]
-      processors: [ memory_limiter, batch ]
-      exporters: [ otlp/vector ]
+#    logs/vector:
+#      receivers: [ otlp ]
+#      processors: [ memory_limiter, batch ]
+#      exporters: [ otlp/vector ]
       
