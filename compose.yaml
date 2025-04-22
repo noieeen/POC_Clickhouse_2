@@ -1,6 +1,0 @@
-﻿services:
-  emptyapi:
-    image: emptyapi
-    build:
-      context: .
-      dockerfile: EmptyAPI/Dockerfile

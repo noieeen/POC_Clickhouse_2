@@ -1,405 +1,260 @@
 version: '3.8'
-  
-  # networks:
-  #   monitoring-network:
-  #     driver: bridge
-  #   redis-exporter:
-  #     driver: bridge
-# traefiknet: { }
 
-# volumes:
-#   prometheus-data:
-#   clickhouse-data:
-#   grafana-data:
-#   rabitmq-data:
-#   redis-data:
+networks:
+  monitoring-network:
+    driver: bridge
+  redis-exporter:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  clickhouse-data:
+  grafana-data:
+  rabitmq-data:
+  redis-data:
 
 
 services:
-  # traefik:
-  #   image: "traefik:v3.3"
-  #   container_name: "traefik"
-  #   command:
-  #     #- "--log.level=DEBUG"
-  #     - "--api.insecure=true"
-  #     - "--providers.docker=true"
-  #     - "--providers.docker.exposedbydefault=false"
-  #     - "--entryPoints.web.address=:80"
-  #   ports:
-  #     - "80:80"
-  #     - "8080:8080"
-  #   volumes:
-  #     - "/var/run/docker.sock:/var/run/docker.sock:ro"
-  #   networks:
-  #     - traefiknet
-
-  # whoami:
-  #   image: "traefik/whoami"
-  #   container_name: "simple-service"
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
-  #     - "traefik.http.routers.whoami.entrypoints=web"
-  #   networks:
-  #     - traefiknet
-
-  api_empty:
-    image: noieeen/emptyapi
-    container_name: empty_api
-    platform: linux/amd64
-    build:
-      context: ..
-      dockerfile: EmptyAPI/Dockerfile
-    ports:
-      - "9010:8080"
-    # depends_on:
-    #   - otel-collector
-    # networks:
-    #   - monitoring-network
-    
-    # # Service A: Main application
-    # service_a:
-    #   image: noieeen/servicea
-    #   platform: linux/amd64
-    #   build:
-    #     context: .
-    #     dockerfile: ../ServiceA/Dockerfile
-    #   environment:
-    #     - ASPNETCORE_ENVIRONMENT=Production
-    #   ports:
-    #     - "8081:8080"
-    #   depends_on:
-    #     - otel-collector
-    #   networks:
-    #     - monitoring-network
-    
-    # # Service B: 2nd application
-    # service_b:
-    #   image: noieeen/serviceb
-    #   platform: linux/amd64
-    #   build:
-    #     context: .
-    #     dockerfile: ../ServiceB/Dockerfile
-    #   environment:
-    #     - ASPNETCORE_ENVIRONMENT=Production
-    #   ports:
-    #     - "8082:8080"
-    #   depends_on:
-    #     - otel-collector
-    #   networks:
-    #     - monitoring-network
-    
-    # # Service Auth
-    # service_auth: # connect mssql
-    #   image: noieeen/serviceauth
-    #   platform: linux/amd64
-    #   build:
-    #     context: ..
-    #     dockerfile: AuthService/Dockerfile
-    #   environment:
-    #     - ASPNETCORE_ENVIRONMENT=Production
-    #   ports:
-    #     - "8083:8080"
-    #   depends_on:
-    #     otel-collector:
-    #       condition: service_started
-    #     database-server:
-    #       condition: service_healthy
-    #   networks:
-    #     - monitoring-network
-    
-    #   # API
-    # api_auth:
-    #   image: noieeen/auth.api
-    #   platform: linux/amd64
-    #   build:
-    #     context: ..
-    #     dockerfile: Auth.Api/Dockerfile
-    #   environment:
-    #     - ASPNETCORE_ENVIRONMENT=Production
-    #   ports:
-    #     - "9001:8080"
-    #   depends_on:
-    #     otel-collector:
-    #       condition: service_started
-    #     database-server:
-    #       condition: service_healthy
-    #   networks:
-    #     - monitoring-network
-    
-    # api_store:
-    #   image: noieeen/store.api
-    #   platform: linux/amd64
-    #   build:
-    #     context: ..
-    #     dockerfile: Store.Api/Dockerfile
-    #   environment:
-    #     - ASPNETCORE_ENVIRONMENT=Production
-    #   ports:
-    #     - "9002:8080"
-    #   depends_on:
-    #     otel-collector:
-    #       condition: service_started
-    #     database-server:
-    #       condition: service_healthy
-    #   networks:
-    #     - monitoring-network
-    
-    # # SQL_Server
-    # database-server:
-    #   image: mcr.microsoft.com/mssql/server:2022-latest
-    #   platform: linux/amd64
-    #   container_name: database-server
-    #   #    hostname: mssql_db
-    #   restart: always
-    #   environment:
-    #     MSSQL_SA_PASSWORD: "MyPass@word90_"
-    #     ACCEPT_EULA: "Y"
-    #     MSSQL_DATA_DIR: /var/opt/mssql/data
-    #     MSSQL_PID: 'Developer'
-    #     MSSQL_TCP_PORT: 1433
-    #   ports:
-    #     - "1433:1433"
-    #   healthcheck:
-    #     test: [ "CMD-SHELL","bash","./configs/script/healthcheck/mssql.sh", ]
-    #     interval: 5s
-    #     timeout: 5s
-    #     retries: 10
-    #   volumes:
-    #     - ../data/mssql-data:/var/opt/mssql/data
-    #     - ../log:/var/opt/mssql/log
-    #     - ../secrets:/var/opt/mssql/secrets
-    #   networks:
-    #     - monitoring-network
-    
-    # # Redis
-    # redis:
-    #   image: redis:8.0-M04-bookworm
-    #   container_name: redis
-    #   platform: linux/amd64
-    #   healthcheck:
-    #     test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
-    #     interval: 1s
-    #     timeout: 3s
-    #     retries: 5
-    #   command: [ "redis-server" ] # Importance
-    #   environment:
-    #     - REDIS_REPLICATION_MODE=master
-    #     - REDIS_PASSWORD=my_master_password
-    #   volumes:
-    #     - radis-data
-    #     # - ../data/redis_data:/bitnami/redis/data
-    #   #      - ./configs/redis:/opt/bitnami/scripts/redis/entrypoint.s
-    #   ports:
-    #     - "6379:6379"
-    #   depends_on:
-    #     - prometheus
-    #   networks:
-    #     - monitoring-network
-    #     - redis-exporter
-    
-    # redis-exporter:
-    #   image: bitnami/redis-exporter:latest
-    #   container_name: redis-exporter
-    #   ports:
-    #     - "9121:9121"
-    #   restart: unless-stopped
-    #   environment:
-    #     REDIS_ADDR: "redis:6379"
-    #     REDIS_USER: null
-    #     REDIS_PASSWORD: my_master_password
-    #   links:
-    #     - redis
-    #     - prometheus
-    #   networks:
-    #     - monitoring-network
-    #     - redis-exporter
-    
-    #   #  # SQL_Server
-    #   #  database.server:
-    #   #    image: mcr.microsoft.com/mssql/server:2022-latest
-    #   #    platform: linux/amd64
-    #   #    container_name: database.server
-    #   #    #    hostname: mssql_db
-    #   #    restart: always
-    #   #    environment:
-    #   #      MSSQL_SA_PASSWORD: "MyPass@word90_"
-    #   #      ACCEPT_EULA: "Y"
-    #   #      MSSQL_DATA_DIR: /var/opt/mssql/data
-    #   #      MSSQL_PID: 'Developer'
-    #   #      MSSQL_TCP_PORT: 1433
-    #   #      LC_ALL: "en_US.UTF-8"
-    #   #      LANG: "en_US.UTF-8"
-    #   #    ports:
-    #   #      - "1433:1433"
-    #   #    healthcheck:
-    #   #      #      test: [ "CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "MyPass@word90_", "-Q", "SELECT 1" ]
-    #   #      #      timeout: 20s
-    #   #      #      retries: 10
-    #   #      #      start_period: 10s
-    #   #      #      test: [ "CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q \"SELECT 1\" || exit 1" ]
-    #   #      test: [ "CMD-SHELL","bash","./configs/script/healthcheck/mssql.sh", ]
-    #   #      #      CMD /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -Q "SELECT 1" || exit 1 ## TODO: TRY
-    #   #      interval: 5s
-    #   #      timeout: 5s
-    #   #      retries: 10
-    #   #    volumes:
-    #   #      - ./data/mssql-data:/var/opt/mssql/data
-    #   #      - ./log:/var/opt/mssql/log
-    #   #      - ./secrets:/var/opt/mssql/secrets
-    #   #    networks:
-    #   #      - monitoring-network
-    
-    #   #  mssql-exporter:
-    #   #    image: quay.io/prometheus/mssql-exporter:latest
-    #   #    container_name: mssql-exporter
-    #   #    ports:
-    #   #      - "4000:4000"
-    #   #    environment:
-    #   #      - DATA_SOURCE_NAME=sqlserver://sa:MyPass@word90_@mssql-db:1433?database=master&encrypt=disable
-    #   #    depends_on:
-    #   #      - mssql
-    #   #    networks:
-    #   #      - monitoring-network
-    
-    
-    #   #  mssql.configurator:
-    #   #      image: mcr.microsoft.com/mssql/server:2022-latest
-    #   #      volumes:
-    #   #        - ./configs/init-mssql/init:/docker-entrypoint-initdb.d
-    #   #      depends_on:
-    #   #        mssql:
-    #   #          condition: service_healthy
-    #   #      command: >
-    #   #        bash -c '
-    #   #        /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P ${Sa_Password:-#password123sdJwnwlk} -d master -i docker-entrypoint-initdb.d/init.sql;
-    #   #        echo "All done!";
-    
-    #   # OpenTelemetry Collector for monitoring
-    # otel-collector:
-    #   image: otel/opentelemetry-collector-contrib:latest
-    #   container_name: otel-collector
-    #   command: [ "--config=/etc/otelcol-contrib/config.yaml" ]
-    #   volumes:
-    #     - ../configs/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
-    #   ports:
-    #     - "4317:4317"   # OTLP gRPC
-    #     - "4318:4318"   # OTLP HTTP
-    #     - "8888:8888"   # Metrics extension
-    #     - "13133:13133" # Health check
-    #   networks:
-    #     - monitoring-network
-    #   depends_on:
-    #     clickhouse:
-    #       condition: service_healthy
-    
-    #   # Prometheus for metrics storage
-    # prometheus:
-    #   image: prom/prometheus:latest
-    #   container_name: prometheus
-    #   volumes:
-    #     - ../configs/prometheus.yml:/etc/prometheus/prometheus.yml
-    #     - prometheus-data
-    #   ports:
-    #     - "9090:9090"
-    #   networks:
-    #     - monitoring-network
-    
-    #   #   # Jaeger for distributed tracing
-    #   # jaeger:
-    #   #   image: jaegertracing/all-in-one:latest
-    #   #   environment:
-    #   #     - COLLECTOR_OTLP_ENABLED=true
-    #   #   ports:
-    #   #     - "16686:16686"  # UI
-    #   #     - "14250:14250"  # Model
-    #   #     - "14268:14268"  # Jaeger-collector HTTP
-    #   #   networks:
-    #   #     - monitoring-network
+#  traefik:
+#    image: "traefik:v3.3"
+#    container_name: "traefik"
+#    command:
+#      #- "--log.level=DEBUG"
+#      - "--api.insecure=true"
+#      - "--providers.docker=true"
+#      - "--providers.docker.exposedbydefault=false"
+#      - "--entryPoints.web.address=:80"
+#    ports:
+#      - "80:80"
+#      - "8080:8080"
+#    volumes:
+#      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+#    networks:
+#      - traefiknet
+#  
+#  whoami:
+#    image: "traefik/whoami"
+#    container_name: "simple-service"
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+#      - "traefik.http.routers.whoami.entrypoints=web"
+#    networks:
+#      - traefiknet
   
-  #   #   # Vector for log processing
-  #   # vector:
-  #   #   image: timberio/vector:0.45.0-debian
-  #   #   command: [ "--config=/etc/vector/vector.toml" ] #,"--verbose" 
-  #   #   volumes:
-  #   #     - ../configs/vector.toml:/etc/vector/vector.toml
-  #   #   ports:
-  #   #     - "8383:8383"  # Vector API server
-  #   #     - "9598:9598"  # Vector metrics endpoint for Prometheus
-  #   #   networks:
-  #   #     - monitoring-network
-  #   #   depends_on:
-  #   #     - prometheus
-  #   #     - clickhouse
-  #   #     - otel-collector
-
-  #   # ClickHouse for log storage
-  # clickhouse:
-  #   image: clickhouse/clickhouse-server:latest
-  #   container_name: clickhouse
-  #   healthcheck:
-  #     test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8123/ping" ]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 3
-  #   volumes:
-  #     - clickhouse-data
-  #     - ../configs/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
-  #     - ../configs/clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml
-  #     - ../configs/clickhouse-users.xml:/etc/clickhouse-server/users.d/logging.xml
-  #   ports:
-  #     - "8123:8123"  # HTTP interface
-  #     - "9000:9000"  # Native interface
-  #   environment:
-  #     - CLICKHOUSE_DB=logs
-  #     - CLICKHOUSE_USER=default
-  #     - CLICKHOUSE_PASSWORD=
-  #     - CLICKHOUSE_ALWAYS_RUN_INITDB_SCRIPTS=1
-  #   networks:
-  #     - monitoring-network
-
-  #   # Grafana for visualization
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   container_name: grafana
-  #   volumes:
-  #     # - ../data/grafana-data:/var/lib/grafana
-  #     - ../configs/grafana/provisioning:/etc/grafana/provisioning
-  #     - ../configs/grafana/dashboards:/var/lib/grafana/dashboards
-  #   environment:
-  #     - GF_SECURITY_ADMIN_PASSWORD=admin
-  #     - GF_SECURITY_ADMIN_USER=admin
-  #     - GF_USERS_ALLOW_SIGN_UP=false
-  #     - GF_INSTALL_PLUGINS=grafana-clickhouse-datasource
-  #     - GF_INSTALL_PLUGINS=maormil-rabbitmq-datasource
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - prometheus
-  #     # - jaeger
-  #     - clickhouse
-  #   networks:
-  #     - monitoring-network
-
-  # rabbitmq:
-  #   image: rabbitmq:4-management
-  #   container_name: rabbitmq
+  #  api_empty:
+  #    image: noieeen/emptyapi
+  #    container_name: empty_api
+  #    platform: linux/amd64
+  #    build:
+  #      context: ..
+  #      dockerfile: EmptyAPI/Dockerfile
+  #    ports:
+  #      - "9010:8080"
+  # depends_on:
+  #   - otel-collector
+  # networks:
+  #   - monitoring-network
+  
+  # # Service A: Main application
+  # service_a:
+  #   image: noieeen/servicea
   #   platform: linux/amd64
-  #   #    container_name: rabbitmq
-  #   ports:
-  #     - "5672:5672"       # AMQP protocol
-  #     - "15672:15672"     # Management UI
-  #     - "15692:15692"     # Prometheus metrics endpoint
-  #   healthcheck:
-  #     test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 5
+  #   build:
+  #     context: .
+  #     dockerfile: ../ServiceA/Dockerfile
   #   environment:
-  #     RABBITMQ_DEFAULT_USER: guest
-  #     RABBITMQ_DEFAULT_PASS: guest
-  #   volumes:
-  #     # - ../data/rabbitmq-data:/var/lib/rabbitmq
-  #     - rabitmq-data
+  #     - ASPNETCORE_ENVIRONMENT=Production
+  #   ports:
+  #     - "8081:8080"
+  #   depends_on:
+  #     - otel-collector
   #   networks:
   #     - monitoring-network
+  
+  # # Service B: 2nd application
+  # service_b:
+  #   image: noieeen/serviceb
+  #   platform: linux/amd64
+  #   build:
+  #     context: .
+  #     dockerfile: ../ServiceB/Dockerfile
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Production
+  #   ports:
+  #     - "8082:8080"
+  #   depends_on:
+  #     - otel-collector
+  #   networks:
+  #     - monitoring-network
+  
+  # # Service Auth
+  # service_auth: # connect mssql
+  #   image: noieeen/serviceauth
+  #   platform: linux/amd64
+  #   build:
+  #     context: ..
+  #     dockerfile: AuthService/Dockerfile
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Production
+  #   ports:
+  #     - "8083:8080"
+  #   depends_on:
+  #     otel-collector:
+  #       condition: service_started
+  #     database-server:
+  #       condition: service_healthy
+  #   networks:
+  #     - monitoring-network
+  
+  #   # API
+  # api_auth:
+  #   image: noieeen/auth.api
+  #   platform: linux/amd64
+  #   build:
+  #     context: ..
+  #     dockerfile: Auth.Api/Dockerfile
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Production
+  #   ports:
+  #     - "9001:8080"
+  #   depends_on:
+  #     otel-collector:
+  #       condition: service_started
+  #     database-server:
+  #       condition: service_healthy
+  #   networks:
+  #     - monitoring-network
+  
+  # api_store:
+  #   image: noieeen/store.api
+  #   platform: linux/amd64
+  #   build:
+  #     context: ..
+  #     dockerfile: Store.Api/Dockerfile
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Production
+  #   ports:
+  #     - "9002:8080"
+  #   depends_on:
+  #     otel-collector:
+  #       condition: service_started
+  #     database-server:
+  #       condition: service_healthy
+  #   networks:
+  #     - monitoring-network
+  
+  
+  
+  
+  
+  
+  
+  
+  # OpenTelemetry Collector for monitoring
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    command: [ "--config=/etc/otelcol-contrib/config.yaml" ]
+    volumes:
+      - ../configs/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8888:8888"   # Metrics extension
+      - "13133:13133" # Health check
+    networks:
+      - monitoring-network
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    
+    # Prometheus for metrics storage
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ../configs/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring-network
+      
+      # Jaeger for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"  # UI
+      - "14250:14250"  # Model
+      - "14268:14268"  # Jaeger-collector HTTP
+    networks:
+      - monitoring-network
+    
+    # Vector for log processing
+  vector:
+    image: timberio/vector:0.45.0-debian
+    command: [ "--config=/etc/vector/vector.toml" ] #,"--verbose" 
+    volumes:
+      - ../configs/vector.toml:/etc/vector/vector.toml
+    ports:
+      - "8383:8383"  # Vector API server
+      - "9598:9598"  # Vector metrics endpoint for Prometheus
+    networks:
+      - monitoring-network
+    depends_on:
+      - prometheus
+      - clickhouse
+      - otel-collector
+  
+  # ClickHouse for log storage
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8123/ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - clickhouse-data
+      - ../configs/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../configs/clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml
+      - ../configs/clickhouse-users.xml:/etc/clickhouse-server/users.d/logging.xml
+    ports:
+      - "8123:8123"  # HTTP interface
+      - "9000:9000"  # Native interface
+    environment:
+      - CLICKHOUSE_DB=logs
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=
+      - CLICKHOUSE_ALWAYS_RUN_INITDB_SCRIPTS=1
+    networks:
+      - monitoring-network
+    
+    # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    volumes:
+      # - ../data/grafana-data:/var/lib/grafana
+      - ../configs/grafana/provisioning:/etc/grafana/provisioning
+      - ../configs/grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clickhouse-datasource
+      - GF_INSTALL_PLUGINS=maormil-rabbitmq-datasource
+    ports:
+      - "80:3000"
+    depends_on:
+      - prometheus
+      # - jaeger
+      - clickhouse
+    networks:
+      - monitoring-network
+  
+

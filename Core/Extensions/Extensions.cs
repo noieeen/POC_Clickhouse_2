@@ -78,7 +78,6 @@ public static class Extensions
                         options.Filter = httpContext =>
                             !httpContext.Request.Path.StartsWithSegments("/metrics");
                     })
-                    .AddJaegerExporter()
                     .AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddSqlClientInstrumentation()
