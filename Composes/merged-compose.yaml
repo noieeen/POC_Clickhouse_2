@@ -10,37 +10,35 @@ volumes:
   prometheus-data:
   clickhouse-data:
   grafana-data:
-  rabitmq-data:
-  redis-data:
 
 
 services:
-#  traefik:
-#    image: "traefik:v3.3"
-#    container_name: "traefik"
-#    command:
-#      #- "--log.level=DEBUG"
-#      - "--api.insecure=true"
-#      - "--providers.docker=true"
-#      - "--providers.docker.exposedbydefault=false"
-#      - "--entryPoints.web.address=:80"
-#    ports:
-#      - "80:80"
-#      - "8080:8080"
-#    volumes:
-#      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-#    networks:
-#      - traefiknet
-#  
-#  whoami:
-#    image: "traefik/whoami"
-#    container_name: "simple-service"
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
-#      - "traefik.http.routers.whoami.entrypoints=web"
-#    networks:
-#      - traefiknet
+  #  traefik:
+  #    image: "traefik:v3.3"
+  #    container_name: "traefik"
+  #    command:
+  #      #- "--log.level=DEBUG"
+  #      - "--api.insecure=true"
+  #      - "--providers.docker=true"
+  #      - "--providers.docker.exposedbydefault=false"
+  #      - "--entryPoints.web.address=:80"
+  #    ports:
+  #      - "80:80"
+  #      - "8080:8080"
+  #    volumes:
+  #      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+  #    networks:
+  #      - traefiknet
+  #  
+  #  whoami:
+  #    image: "traefik/whoami"
+  #    container_name: "simple-service"
+  #    labels:
+  #      - "traefik.enable=true"
+  #      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+  #      - "traefik.http.routers.whoami.entrypoints=web"
+  #    networks:
+  #      - traefiknet
   
   #  api_empty:
   #    image: noieeen/emptyapi
@@ -154,6 +152,7 @@ services:
   # OpenTelemetry Collector for monitoring
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
+    platform: linux/amd64
     container_name: otel-collector
     command: [ "--config=/etc/otelcol-contrib/config.yaml" ]
     volumes:
@@ -172,6 +171,7 @@ services:
     # Prometheus for metrics storage
   prometheus:
     image: prom/prometheus:latest
+    platform: linux/amd64
     container_name: prometheus
     volumes:
       - ../configs/prometheus.yml:/etc/prometheus/prometheus.yml
@@ -184,6 +184,7 @@ services:
       # Jaeger for distributed tracing
   jaeger:
     image: jaegertracing/all-in-one:latest
+    platform: linux/amd64
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     ports:
@@ -196,6 +197,7 @@ services:
     # Vector for log processing
   vector:
     image: timberio/vector:0.45.0-debian
+    platform: linux/amd64
     command: [ "--config=/etc/vector/vector.toml" ] #,"--verbose" 
     volumes:
       - ../configs/vector.toml:/etc/vector/vector.toml
@@ -212,6 +214,7 @@ services:
   # ClickHouse for log storage
   clickhouse:
     image: clickhouse/clickhouse-server:latest
+    platform: linux/amd64
     container_name: clickhouse
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8123/ping" ]
@@ -237,6 +240,7 @@ services:
     # Grafana for visualization
   grafana:
     image: grafana/grafana:latest
+    platform: linux/amd64
     container_name: grafana
     volumes:
       # - ../data/grafana-data:/var/lib/grafana
