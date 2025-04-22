@@ -76,9 +76,9 @@ exporters:
       max_elapsed_time: 300s
 
 
-connectors:
-  spanmetrics:
-    namespace: span.metrics
+#connectors:
+#  spanmetrics:
+#    namespace: span.metrics
 
 service:
   pipelines:
