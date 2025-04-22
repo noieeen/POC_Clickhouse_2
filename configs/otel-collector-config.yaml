@@ -76,9 +76,9 @@ exporters:
       max_elapsed_time: 300s
 
 
-#connectors:
-#  spanmetrics:
-#    namespace: span.metrics
+connectors:
+  spanmetrics:
+    namespace: span.metrics
 
 service:
   pipelines:
@@ -127,4 +127,8 @@ service:
 #      receivers: [ otlp ]
 #      processors: [ memory_limiter, batch ]
 #      exporters: [ otlp/vector ]
-      
+
+    traces/spanmetrics:
+      receivers: [ otlp ]
+      processors: [ memory_limiter, batch ]
+      exporters: [ spanmetrics ]
